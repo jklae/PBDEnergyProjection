@@ -51,6 +51,7 @@ private:
 
 	//
 	float _timeStep;
+	float _floorPosition;
 
 	void _update();
 

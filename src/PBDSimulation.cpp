@@ -8,7 +8,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	_nodeCount = { 0, 6 };
-
+	_floorPosition = 0.0f;
 }
 
 PBDSimulation::~PBDSimulation()
@@ -18,6 +18,7 @@ PBDSimulation::~PBDSimulation()
 void PBDSimulation::_update()
 {
 	_force();
+	_project();
 }
 
 void PBDSimulation::_force()
@@ -30,6 +31,13 @@ void PBDSimulation::_force()
 
 void PBDSimulation::_project()
 {
+	for (int j = 0; j < _nodeCount.y; j++)
+	{
+		if (_nodePosition[j].y < _floorPosition)
+		{
+			_nodePosition[j].y = _floorPosition;
+		}
+	}
 }
 
 
