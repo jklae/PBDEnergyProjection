@@ -53,9 +53,12 @@ private:
 	float _timeStep;
 	float _floorPosition;
 
+	//void _springConstraint(DirectX::XMFLOAT2 p1, DirectX::XMFLOAT2 p2, float d);
+
 	void _update();
 
 	void _force();
 	void _project();
+	void _updateVelocity();
 };
 

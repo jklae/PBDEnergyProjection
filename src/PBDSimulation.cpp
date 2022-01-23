@@ -8,7 +8,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	_nodeCount = { 0, 6 };
-	_floorPosition = 0.0f;
+	_floorPosition = -10.0f;
 }
 
 PBDSimulation::~PBDSimulation()
@@ -19,24 +19,45 @@ void PBDSimulation::_update()
 {
 	_force();
 	_project();
+	_updateVelocity();
 }
 
 void PBDSimulation::_force()
 {
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		_nodePosition[j].y -= 0.98f * _timeStep;
+		_nodeVelocity[j].y -= 0.98f * _timeStep;
 	}
 }
 
 void PBDSimulation::_project()
 {
+	/*for (int j = 0; j < _nodeCount.y - 1; j++)
+	{
+		float p1 = _nodePosition[j].y;
+		float p2 = _nodePosition[j + 1].y;
+		float d = 1.0f;
+		float delta_p1 = -(fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
+		float delta_p2 = +(fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
+
+		_nodePosition[j].y += delta_p1 * 
+	}*/
+
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
+		// Floor boundary condition
 		if (_nodePosition[j].y < _floorPosition)
 		{
 			_nodePosition[j].y = _floorPosition;
 		}
+	}
+}
+
+void PBDSimulation::_updateVelocity()
+{
+	for (int j = 0; j < _nodeCount.y; j++)
+	{
+		_nodePosition[j].y += _nodeVelocity[j].y * _timeStep;
 	}
 }
 
