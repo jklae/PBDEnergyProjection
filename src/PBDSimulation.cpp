@@ -24,7 +24,7 @@ void PBDSimulation::_force()
 {
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-
+		_nodePosition[j].y -= 0.98f * _timeStep;
 	}
 }
 
