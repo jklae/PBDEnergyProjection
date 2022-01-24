@@ -32,50 +32,57 @@ void PBDSimulation::_project()
 	float alpha = 0.001f;
 	float alphaTilda = alpha / (dt * dt);
 
-	for (int j = 0; j < _nodeCount.y; j++)
+	int nSteps = 10;
+	float subdt = dt / static_cast<float>(nSteps);
+
+	for (int t = 0; t < nSteps; t++)
 	{
-		newPosition[j].y += _nodeVelocity[j].y * dt - 9.8f * dt * dt;
-	}
-
-	for (int iter = 0; iter < 10; iter++)
-	{
-		/*float p1 = newPosition[0].y;
-		float p2 = newPosition[1].y;
-		float d = 2.0f;
-		float delta_p2 = +0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
-
-		newPosition[1].y += delta_p2 * stiffness;*/
-
-		for (int j = 0; j < _nodeCount.y - 1; j++)
+		for (int j = 0; j < _nodeCount.y; j++)
 		{
-			float p1 = newPosition[j].y;
-			float p2 = newPosition[j + 1].y;
-			float d = 4.0f;
-			float abs_p1_p2 = fabsf(p1 - p2);
+			newPosition[j].y += _nodeVelocity[j].y * dt - 9.8f * dt * dt;
+		}
 
-			float delta_p1 = abs_p1_p2 > FLT_EPSILON ? +lamda[j] * (p1 - p2) / fabsf(p1 - p2) : 0.0f;
-			float delta_p2 = abs_p1_p2 > FLT_EPSILON ? -lamda[j] * (p1 - p2) / fabsf(p1 - p2) : 0.0f;
-			float delta_lamda = (-0.5f * (fabsf(p1 - p2) - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
+		for (int iter = 0; iter < 1; iter++)
+		{
+			/*float p1 = newPosition[0].y;
+			float p2 = newPosition[1].y;
+			float d = 2.0f;
+			float delta_p2 = +0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
 
-			newPosition[j].y += delta_p1 ;
-			newPosition[j + 1].y += delta_p2 ;
-			lamda[j] += delta_lamda ;
+			newPosition[1].y += delta_p2 * stiffness;*/
+			
+			for (int j = 0; j < _nodeCount.y - 1; j++)
+			{
+				float p1 = newPosition[j].y;
+				float p2 = newPosition[j + 1].y;
+				float d = 4.0f;
+				float abs_p1_p2 = fabsf(p1 - p2);
+
+				float delta_p1 = +lamda[j] * (p1 - p2) / fabsf(p1 - p2);
+				float delta_p2 = -lamda[j] * (p1 - p2) / fabsf(p1 - p2);
+				float delta_lamda = (-0.5f * (fabsf(p1 - p2) - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
+
+				newPosition[j].y += delta_p1;
+				newPosition[j + 1].y += delta_p2;
+				lamda[j] += delta_lamda;
+			}
+
+			for (int j = 0; j < _nodeCount.y; j++)
+			{
+				// Floor boundary condition
+				if (newPosition[j].y < _floorPosition)
+				{
+					newPosition[j].y = _floorPosition;
+				}
+			}
 		}
 
 		for (int j = 0; j < _nodeCount.y; j++)
 		{
-			// Floor boundary condition
-			if (newPosition[j].y < _floorPosition)
-			{
-				newPosition[j].y = _floorPosition;
-			}
+			_nodeVelocity[j].y = (newPosition[j].y - _nodePosition[j].y) / dt;
+			_nodePosition[j].y = newPosition[j].y;
 		}
-	}
 
-	for (int j = 0; j < _nodeCount.y; j++)
-	{
-		_nodeVelocity[j].y = (newPosition[j].y - _nodePosition[j].y) / dt;
-		_nodePosition[j].y = newPosition[j].y;
 	}
 	
 }
@@ -151,7 +158,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { 0.0f, static_cast<float>(j) * 4.0f };
+		XMFLOAT2 pos = { 0.0f, 10.0f + static_cast<float>(j) * 4.0f };
 		_nodePosition.push_back(pos);
 		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
