@@ -8,7 +8,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	_nodeCount = { 0, 6 };
-	_floorPosition = -10.0f;
+	_floorPosition = 0.0f;
 }
 
 PBDSimulation::~PBDSimulation()
@@ -24,41 +24,60 @@ void PBDSimulation::_update()
 
 void PBDSimulation::_force()
 {
-	for (int j = 0; j < _nodeCount.y; j++)
-	{
-		_nodeVelocity[j].y -= 0.98f * _timeStep;
-	}
 }
 
 void PBDSimulation::_project()
 {
-	/*for (int j = 0; j < _nodeCount.y - 1; j++)
-	{
-		float p1 = _nodePosition[j].y;
-		float p2 = _nodePosition[j + 1].y;
-		float d = 1.0f;
-		float delta_p1 = -(fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
-		float delta_p2 = +(fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
+	vector<XMFLOAT2> prevPosition = _nodePosition;
 
-		_nodePosition[j].y += delta_p1 * 
-	}*/
+	for (int j = 1; j < _nodeCount.y; j++)
+	{
+		prevPosition[j].y += _nodeVelocity[j].y * _timeStep - 0.98f * _timeStep * _timeStep;
+	}
+
+	vector<XMFLOAT2> newPosition = prevPosition;
+
+	for (int iter = 0; iter < 200; iter++)
+	{
+		float p1 = newPosition[0].y;
+		float p2 = newPosition[1].y;
+		float d = 2.0f;
+		float delta_p2 = +0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
+
+		newPosition[1].y += delta_p2 * 0.00001f;
+
+		for (int j = 1; j < _nodeCount.y - 1; j++)
+		{
+			float p1 = newPosition[j].y;
+			float p2 = newPosition[j + 1].y;
+			float d = 2.0f;
+			float delta_p1 = -0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
+			float delta_p2 = +0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
+
+			newPosition[j].y += delta_p1 * 0.00001f;
+			newPosition[j + 1].y += delta_p2 * 0.00001f;
+		}
+
+		//for (int j = 0; j < _nodeCount.y; j++)
+		//{
+		//	// Floor boundary condition
+		//	if (newPosition[j].y < _floorPosition)
+		//	{
+		//		newPosition[j].y = _floorPosition;
+		//	}
+		//}
+	}
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		// Floor boundary condition
-		if (_nodePosition[j].y < _floorPosition)
-		{
-			_nodePosition[j].y = _floorPosition;
-		}
+		_nodeVelocity[j].y = (newPosition[j].y - _nodePosition[j].y) / _timeStep;
+		_nodePosition[j].y = newPosition[j].y;
 	}
+	
 }
 
 void PBDSimulation::_updateVelocity()
 {
-	for (int j = 0; j < _nodeCount.y; j++)
-	{
-		_nodePosition[j].y += _nodeVelocity[j].y * _timeStep;
-	}
 }
 
 
@@ -133,7 +152,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { 0.0f, static_cast<float>(j) * 2.0f };
+		XMFLOAT2 pos = { 0.0f, static_cast<float>(j) * 3.0f };
 		_nodePosition.push_back(pos);
 		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
