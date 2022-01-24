@@ -10,7 +10,7 @@
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
-    float dt = FPS120_F;
+    float dt = 0.001f;
     PBDSimulation* fluidsim = new PBDSimulation(dt);
 
     DX12App* dxapp = new DX12App();

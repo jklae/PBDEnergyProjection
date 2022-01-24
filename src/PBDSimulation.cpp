@@ -7,8 +7,8 @@ using namespace DXViewer::util;
 PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
-	_nodeCount = { 0, 6 };
-	_floorPosition = 0.0f;
+	_nodeCount = { 0, 10 };
+	_floorPosition = -20.0f;
 }
 
 PBDSimulation::~PBDSimulation()
@@ -17,36 +17,31 @@ PBDSimulation::~PBDSimulation()
 
 void PBDSimulation::_update()
 {
-	_force();
 	_project();
-	_updateVelocity();
 }
 
-void PBDSimulation::_force()
-{
-}
 
 void PBDSimulation::_project()
 {
 	vector<XMFLOAT2> prevPosition = _nodePosition;
 
-	for (int j = 1; j < _nodeCount.y; j++)
+	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		prevPosition[j].y += _nodeVelocity[j].y * _timeStep - 0.98f * _timeStep * _timeStep;
+		prevPosition[j].y += _nodeVelocity[j].y * _timeStep - 9.8f * _timeStep * _timeStep;
 	}
 
 	vector<XMFLOAT2> newPosition = prevPosition;
 
-	for (int iter = 0; iter < 200; iter++)
+	for (int iter = 0; iter < 100; iter++)
 	{
-		float p1 = newPosition[0].y;
+		/*float p1 = newPosition[0].y;
 		float p2 = newPosition[1].y;
 		float d = 2.0f;
 		float delta_p2 = +0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
 
-		newPosition[1].y += delta_p2 * 0.00001f;
+		newPosition[1].y += delta_p2 * 0.00001f;*/
 
-		for (int j = 1; j < _nodeCount.y - 1; j++)
+		for (int j = 0; j < _nodeCount.y - 1; j++)
 		{
 			float p1 = newPosition[j].y;
 			float p2 = newPosition[j + 1].y;
@@ -58,14 +53,14 @@ void PBDSimulation::_project()
 			newPosition[j + 1].y += delta_p2 * 0.00001f;
 		}
 
-		//for (int j = 0; j < _nodeCount.y; j++)
-		//{
-		//	// Floor boundary condition
-		//	if (newPosition[j].y < _floorPosition)
-		//	{
-		//		newPosition[j].y = _floorPosition;
-		//	}
-		//}
+		for (int j = 0; j < _nodeCount.y; j++)
+		{
+			// Floor boundary condition
+			if (newPosition[j].y < _floorPosition)
+			{
+				newPosition[j].y = _floorPosition;
+			}
+		}
 	}
 
 	for (int j = 0; j < _nodeCount.y; j++)
@@ -75,11 +70,6 @@ void PBDSimulation::_project()
 	}
 	
 }
-
-void PBDSimulation::_updateVelocity()
-{
-}
-
 
 
 #pragma region Implementation
@@ -152,7 +142,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { 0.0f, static_cast<float>(j) * 3.0f };
+		XMFLOAT2 pos = { 0.0f, static_cast<float>(j) * 2.0f };
 		_nodePosition.push_back(pos);
 		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 

@@ -57,8 +57,6 @@ private:
 
 	void _update();
 
-	void _force();
 	void _project();
-	void _updateVelocity();
 };
 
