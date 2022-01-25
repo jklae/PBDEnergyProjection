@@ -52,7 +52,7 @@ private:
 	//
 	float _timeStep;
 	float _floorPosition;
-	DirectX::XMFLOAT2 _stride;
+	float _stride;
 
 	//void _springConstraint(DirectX::XMFLOAT2 p1, DirectX::XMFLOAT2 p2, float d);
 

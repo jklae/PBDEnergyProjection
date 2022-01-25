@@ -10,7 +10,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 {
 	_nodeCount = { 0, 20 };
 	_floorPosition = -2.0f * _nodeCount.y;
-	_stride = { 2.0f, 3.0f };
+	_stride = 3.0f;
 }
 
 PBDSimulation::~PBDSimulation()
@@ -51,7 +51,7 @@ void PBDSimulation::_project()
 			{
 				XMFLOAT2 p1 = newPosition[j];
 				XMFLOAT2 p2 = newPosition[j + 1];
-				XMFLOAT2 d = _stride;
+				XMFLOAT2 d = { _stride, _stride };
 				XMFLOAT2 abs_p1_p2 = fabsxmf2(p1 - p2);
 
 				XMFLOAT2 delta_p1 = 
@@ -161,7 +161,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { static_cast<float>(j) * _stride.x, 10.0f + static_cast<float>(j) * _stride.y };
+		XMFLOAT2 pos = { static_cast<float>(j) * _stride, 10.0f + static_cast<float>(j) * _stride };
 		_nodePosition.push_back(pos);
 		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
