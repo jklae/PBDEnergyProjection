@@ -10,7 +10,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 {
 	_nodeCount = { 0, 20 };
 	_floorPosition = -2.0f * _nodeCount.y;
-	_stride = 3.0f;
+	_stride = { 2.0f, 3.0f };
 }
 
 PBDSimulation::~PBDSimulation()
@@ -26,7 +26,7 @@ void PBDSimulation::_update()
 void PBDSimulation::_project()
 {
 	vector<XMFLOAT2> newPosition(_nodePosition);
-	vector<float> lamda(_nodeCount.y, 0.0f);
+	vector<XMFLOAT2> lamda(_nodeCount.y, { 0.0f, 0.0f });
 
 	float dt = _timeStep;
 	float alpha = 0.001f;
@@ -49,17 +49,25 @@ void PBDSimulation::_project()
 			
 			for (int j = 0; j < _nodeCount.y - 1; j++)
 			{
-				float p1 = newPosition[j].y;
-				float p2 = newPosition[j + 1].y;
-				float d = _stride;
-				float abs_p1_p2 = fabsf(p1 - p2);
+				XMFLOAT2 p1 = newPosition[j];
+				XMFLOAT2 p2 = newPosition[j + 1];
+				XMFLOAT2 d = _stride;
+				XMFLOAT2 abs_p1_p2 = fabsxmf2(p1 - p2);
 
-				float delta_p1 = +lamda[j] * (p1 - p2) / fabsf(p1 - p2);
-				float delta_p2 = -lamda[j] * (p1 - p2) / fabsf(p1 - p2);
-				float delta_lamda = (-0.5f * (fabsf(p1 - p2) - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
+				XMFLOAT2 delta_p1 = 
+				{
+					abs_p1_p2.x > FLT_EPSILON ? +lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
+					abs_p1_p2.y > FLT_EPSILON ? +lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
+				};
+				XMFLOAT2 delta_p2 =
+				{
+					abs_p1_p2.x > FLT_EPSILON ? -lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
+					abs_p1_p2.y > FLT_EPSILON ? -lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
+				};
+				XMFLOAT2 delta_lamda = (-0.5f * (abs_p1_p2 - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
 
-				newPosition[j].y += delta_p1;
-				newPosition[j + 1].y += delta_p2;
+				newPosition[j] += delta_p1;
+				newPosition[j + 1] += delta_p2;
 				lamda[j] += delta_lamda;
 			}
 
@@ -153,7 +161,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { 0.0f, 10.0f + static_cast<float>(j) * _stride };
+		XMFLOAT2 pos = { static_cast<float>(j) * _stride.x, 10.0f + static_cast<float>(j) * _stride.y };
 		_nodePosition.push_back(pos);
 		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
