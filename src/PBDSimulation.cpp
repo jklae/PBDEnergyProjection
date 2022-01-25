@@ -8,8 +8,9 @@ using namespace DXViewer::xmfloat2;
 PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
-	_nodeCount = { 0, 10 };
-	_floorPosition = -20.0f;
+	_nodeCount = { 0, 20 };
+	_floorPosition = -2.0f * _nodeCount.y;
+	_stride = 3.0f;
 }
 
 PBDSimulation::~PBDSimulation()
@@ -28,7 +29,6 @@ void PBDSimulation::_project()
 	vector<float> lamda(_nodeCount.y, 0.0f);
 
 	float dt = _timeStep;
-	float stiffness = 0.1f;
 	float alpha = 0.001f;
 	float alphaTilda = alpha / (dt * dt);
 
@@ -37,25 +37,21 @@ void PBDSimulation::_project()
 
 	for (int t = 0; t < nSteps; t++)
 	{
+		// External force
 		for (int j = 0; j < _nodeCount.y; j++)
 		{
 			newPosition[j].y += _nodeVelocity[j].y * dt - 9.8f * dt * dt;
 		}
 
+		// Constraint projection
 		for (int iter = 0; iter < 1; iter++)
 		{
-			/*float p1 = newPosition[0].y;
-			float p2 = newPosition[1].y;
-			float d = 2.0f;
-			float delta_p2 = +0.5f * (fabsf(p1 - p2) - d) * (p1 - p2) / fabsf(p1 - p2);
-
-			newPosition[1].y += delta_p2 * stiffness;*/
 			
 			for (int j = 0; j < _nodeCount.y - 1; j++)
 			{
 				float p1 = newPosition[j].y;
 				float p2 = newPosition[j + 1].y;
-				float d = 4.0f;
+				float d = _stride;
 				float abs_p1_p2 = fabsf(p1 - p2);
 
 				float delta_p1 = +lamda[j] * (p1 - p2) / fabsf(p1 - p2);
@@ -67,20 +63,19 @@ void PBDSimulation::_project()
 				lamda[j] += delta_lamda;
 			}
 
+			// Floor boundary condition
 			for (int j = 0; j < _nodeCount.y; j++)
 			{
-				// Floor boundary condition
 				if (newPosition[j].y < _floorPosition)
-				{
 					newPosition[j].y = _floorPosition;
-				}
 			}
 		}
 
+		// Update the velocity
 		for (int j = 0; j < _nodeCount.y; j++)
 		{
-			_nodeVelocity[j].y = (newPosition[j].y - _nodePosition[j].y) / dt;
-			_nodePosition[j].y = newPosition[j].y;
+			_nodeVelocity[j] = (newPosition[j] - _nodePosition[j]) / dt;
+			_nodePosition[j] = newPosition[j];
 		}
 
 	}
@@ -158,7 +153,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { 0.0f, 10.0f + static_cast<float>(j) * 4.0f };
+		XMFLOAT2 pos = { 0.0f, 10.0f + static_cast<float>(j) * _stride };
 		_nodePosition.push_back(pos);
 		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
