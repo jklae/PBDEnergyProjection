@@ -7,9 +7,8 @@ public:
 	SpringConstraint(DirectX::XMFLOAT2& p1, DirectX::XMFLOAT2& p2, DirectX::XMFLOAT2 d);
 	~SpringConstraint();
 
-	void solvePBD(float dt);
-	void springConstraint(
-		DirectX::XMFLOAT2& p1, DirectX::XMFLOAT2& p2, DirectX::XMFLOAT2 d, float subdt, DirectX::XMFLOAT2& lamda);
+	void setLamda(DirectX::XMFLOAT2 lamda);
+	void springConstraint(float subdt);
 
 private:
 	DirectX::XMFLOAT2& _p1;

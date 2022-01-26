@@ -10,12 +10,11 @@ PBDSimulation::PBDSimulation(float timeStep)
 	// Float initialization
 	_nodeCount = { 1, 20 };
 	_floorPosition = -2.0f * _nodeCount.y;
-	_stride = 3.0f;
+	_stride = 2.0f;
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
-	lamda.assign(_nodeCount.y, { 0.0f, 0.0f });
 
 	// Constraint initialization
 	for (int j = 0; j < _nodeCount.y - 1; j++)
@@ -43,7 +42,10 @@ void PBDSimulation::_update()
 void PBDSimulation::_project()
 {
 	_newPosition = _nodePosition;
-	fill(lamda.begin(), lamda.end(), XMFLOAT2(0.0f, 0.0f));
+	/*for (SpringConstraint& sp : _constraint)
+	{
+		sp.setLamda(XMFLOAT2(0.0f, 0.0f));
+	}*/
 
 	float dt = _timeStep;
 	int nSteps = 10;
@@ -60,14 +62,9 @@ void PBDSimulation::_project()
 		// Constraint projection
 		for (int iter = 0; iter < 1; iter++)
 		{
-			
-			for (int j = 0; j < _nodeCount.y - 1; j++)
+			for (SpringConstraint& sp : _constraint)
 			{
-				XMFLOAT2& p1 = _newPosition[j];
-				XMFLOAT2& p2 = _newPosition[j + 1];
-				XMFLOAT2 d = { _stride, _stride };
-
-				_constraint[0].springConstraint(p1, p2, d, subdt, lamda[j]);
+				sp.springConstraint(subdt);
 			}
 
 			// Floor boundary condition

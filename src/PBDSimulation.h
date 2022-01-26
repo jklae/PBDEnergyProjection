@@ -57,8 +57,6 @@ private:
 	float _floorPosition;
 	float _stride;
 
-	std::vector<DirectX::XMFLOAT2> lamda;
-
 	void _update();
 
 	void _project();
