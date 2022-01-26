@@ -1,11 +1,15 @@
 #pragma once
+#include "dx12header.h"
 
 class SpringConstraint
 {
 public:
-	SpringConstraint();
+	SpringConstraint(DirectX::XMFLOAT2 p1, DirectX::XMFLOAT2 p2, DirectX::XMFLOAT2 d);
 	~SpringConstraint();
 
 private:
+	DirectX::XMFLOAT2 _p1;
+	DirectX::XMFLOAT2 _p2;
+	DirectX::XMFLOAT2 _d;
 };
 

@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include "SpringConstraint.h"
 #include "Win32App.h" // This includes ISimulation.h
 
 class PBDSimulation : public ISimulation
@@ -46,10 +47,12 @@ private:
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
 
-	std::vector<DirectX::XMFLOAT2> _nodePosition;
-	std::vector<DirectX::XMFLOAT2> _nodeVelocity;
 
 	//
+	std::vector<DirectX::XMFLOAT2> _nodePosition;
+	std::vector<DirectX::XMFLOAT2> _nodeVelocity;
+	std::vector<DirectX::XMFLOAT2> _newPosition;
+	std::vector<SpringConstraint> _constraint;
 	float _timeStep;
 	float _floorPosition;
 	float _stride;
