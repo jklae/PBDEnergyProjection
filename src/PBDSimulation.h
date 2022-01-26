@@ -57,7 +57,8 @@ private:
 	float _floorPosition;
 	float _stride;
 
-	//void _springConstraint(DirectX::XMFLOAT2 p1, DirectX::XMFLOAT2 p2, float d);
+	void _springConstraint(DirectX::XMFLOAT2& p1, DirectX::XMFLOAT2& p2, DirectX::XMFLOAT2 d, float subdt, int j);
+	std::vector<DirectX::XMFLOAT2> lamda;
 
 	void _update();
 

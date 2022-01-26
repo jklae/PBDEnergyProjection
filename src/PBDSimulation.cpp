@@ -15,6 +15,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
+	lamda.assign(_nodeCount.y, { 0.0f, 0.0f });
 
 	// Constraint initialization
 	for (int j = 0; j < _nodeCount.y - 1; j++)
@@ -32,6 +33,30 @@ PBDSimulation::~PBDSimulation()
 {
 }
 
+void PBDSimulation::_springConstraint(DirectX::XMFLOAT2& p1, DirectX::XMFLOAT2& p2, DirectX::XMFLOAT2 d, float subdt, int j)
+{
+	float alpha = 0.001f;
+	float alphaTilda = alpha / (subdt * subdt);
+
+	XMFLOAT2 abs_p1_p2 = fabsxmf2(p1 - p2);
+
+	XMFLOAT2 delta_p1 =
+	{
+		abs_p1_p2.x > FLT_EPSILON ? +lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
+		abs_p1_p2.y > FLT_EPSILON ? +lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
+	};
+	XMFLOAT2 delta_p2 =
+	{
+		abs_p1_p2.x > FLT_EPSILON ? -lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
+		abs_p1_p2.y > FLT_EPSILON ? -lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
+	};
+	XMFLOAT2 delta_lamda = (-0.5f * (abs_p1_p2 - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
+
+	p1 += delta_p1;
+	p2 += delta_p2;
+	lamda[j] += delta_lamda;
+}
+
 void PBDSimulation::_update()
 {
 	_project();
@@ -41,14 +66,11 @@ void PBDSimulation::_update()
 void PBDSimulation::_project()
 {
 	_newPosition = _nodePosition;
-	vector<XMFLOAT2> lamda(_nodeCount.y, { 0.0f, 0.0f });
+	fill(lamda.begin(), lamda.end(), XMFLOAT2(0.0f, 0.0f));
 
 	float dt = _timeStep;
 	int nSteps = 10;
 	float subdt = dt / static_cast<float>(nSteps);
-
-	float alpha = 0.001f;
-	float alphaTilda = alpha / (subdt * subdt);
 
 	for (int t = 0; t < nSteps; t++)
 	{
@@ -64,26 +86,11 @@ void PBDSimulation::_project()
 			
 			for (int j = 0; j < _nodeCount.y - 1; j++)
 			{
-				XMFLOAT2 p1 = _newPosition[j];
-				XMFLOAT2 p2 = _newPosition[j + 1];
+				XMFLOAT2& p1 = _newPosition[j];
+				XMFLOAT2& p2 = _newPosition[j + 1];
 				XMFLOAT2 d = { _stride, _stride };
-				XMFLOAT2 abs_p1_p2 = fabsxmf2(p1 - p2);
 
-				XMFLOAT2 delta_p1 = 
-				{
-					abs_p1_p2.x > FLT_EPSILON ? +lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
-					abs_p1_p2.y > FLT_EPSILON ? +lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
-				};
-				XMFLOAT2 delta_p2 =
-				{
-					abs_p1_p2.x > FLT_EPSILON ? -lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
-					abs_p1_p2.y > FLT_EPSILON ? -lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
-				};
-				XMFLOAT2 delta_lamda = (-0.5f * (abs_p1_p2 - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
-
-				_newPosition[j] += delta_p1;
-				_newPosition[j + 1] += delta_p2;
-				lamda[j] += delta_lamda;
+				_springConstraint(p1, p2, d, subdt, j);
 			}
 
 			// Floor boundary condition
