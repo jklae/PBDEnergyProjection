@@ -16,17 +16,6 @@ PBDSimulation::PBDSimulation(float timeStep)
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
 
-	// Constraint initialization
-	float alpha = 0.001f;
-	for (int j = 0; j < _nodeCount.y - 1; j++)
-	{
-		XMFLOAT2& p1 = _newPosition[j];
-		XMFLOAT2& p2 = _newPosition[j + 1];
-		XMFLOAT2 d = { _stride, _stride };
-
-		SpringConstraint sp(p1, p2, d, alpha);
-		_constraint.push_back(sp);
-	}
 }
 
 PBDSimulation::~PBDSimulation()
@@ -168,6 +157,19 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 		objectCB.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
 		constantBuffer.push_back(objectCB);
+	}
+
+
+	// Constraint initialization
+	float alpha = 0.001f;
+	for (int j = 0; j < _nodeCount.y - 1; j++)
+	{
+		XMFLOAT2& p1 = _newPosition[j];
+		XMFLOAT2& p2 = _newPosition[j + 1];
+		XMFLOAT2 d = fabsxmf2(_nodePosition[j + 1] - _nodePosition[j]);
+
+		SpringConstraint sp(p1, p2, d, alpha);
+		_constraint.push_back(sp);
 	}
 }
 
