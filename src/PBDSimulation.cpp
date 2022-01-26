@@ -17,13 +17,14 @@ PBDSimulation::PBDSimulation(float timeStep)
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
 
 	// Constraint initialization
+	float alpha = 0.001f;
 	for (int j = 0; j < _nodeCount.y - 1; j++)
 	{
 		XMFLOAT2& p1 = _newPosition[j];
 		XMFLOAT2& p2 = _newPosition[j + 1];
 		XMFLOAT2 d = { _stride, _stride };
 
-		SpringConstraint sp(p1, p2, d);
+		SpringConstraint sp(p1, p2, d, alpha);
 		_constraint.push_back(sp);
 	}
 }
@@ -56,7 +57,7 @@ void PBDSimulation::_project()
 		// External force
 		for (int j = 0; j < _nodeCount.y; j++)
 		{
-			_newPosition[j].y += _nodeVelocity[j].y * subdt - 9.8f * subdt * subdt;
+			_newPosition[j].y += (subdt * _nodeVelocity[j].y) + (subdt * subdt * -9.8f);
 		}
 
 		// Constraint projection
