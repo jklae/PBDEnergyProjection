@@ -33,29 +33,6 @@ PBDSimulation::~PBDSimulation()
 {
 }
 
-void PBDSimulation::_springConstraint(DirectX::XMFLOAT2& p1, DirectX::XMFLOAT2& p2, DirectX::XMFLOAT2 d, float subdt, int j)
-{
-	float alpha = 0.001f;
-	float alphaTilda = alpha / (subdt * subdt);
-
-	XMFLOAT2 abs_p1_p2 = fabsxmf2(p1 - p2);
-
-	XMFLOAT2 delta_p1 =
-	{
-		abs_p1_p2.x > FLT_EPSILON ? +lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
-		abs_p1_p2.y > FLT_EPSILON ? +lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
-	};
-	XMFLOAT2 delta_p2 =
-	{
-		abs_p1_p2.x > FLT_EPSILON ? -lamda[j].x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
-		abs_p1_p2.y > FLT_EPSILON ? -lamda[j].y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
-	};
-	XMFLOAT2 delta_lamda = (-0.5f * (abs_p1_p2 - d) - alphaTilda * lamda[j]) / (1.0f + alphaTilda);
-
-	p1 += delta_p1;
-	p2 += delta_p2;
-	lamda[j] += delta_lamda;
-}
 
 void PBDSimulation::_update()
 {
@@ -90,7 +67,7 @@ void PBDSimulation::_project()
 				XMFLOAT2& p2 = _newPosition[j + 1];
 				XMFLOAT2 d = { _stride, _stride };
 
-				_springConstraint(p1, p2, d, subdt, j);
+				_constraint[0].springConstraint(p1, p2, d, subdt, lamda[j]);
 			}
 
 			// Floor boundary condition
