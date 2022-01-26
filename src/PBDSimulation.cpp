@@ -16,14 +16,15 @@ PBDSimulation::PBDSimulation(float timeStep)
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
 
+	// Constraint initialization
 	for (int j = 0; j < _nodeCount.y - 1; j++)
 	{
-		/*XMFLOAT2 p1 = newPosition[j];
-		XMFLOAT2 p2 = newPosition[j + 1];
-		XMFLOAT2 d = { _stride, _stride };*/
+		XMFLOAT2& p1 = _newPosition[j];
+		XMFLOAT2& p2 = _newPosition[j + 1];
+		XMFLOAT2 d = { _stride, _stride };
 
-		//SpringConstraint sp();
-		//_constraint.push_back();
+		SpringConstraint sp(p1, p2, d);
+		_constraint.push_back(sp);
 	}
 }
 
@@ -43,18 +44,18 @@ void PBDSimulation::_project()
 	vector<XMFLOAT2> lamda(_nodeCount.y, { 0.0f, 0.0f });
 
 	float dt = _timeStep;
-	float alpha = 0.001f;
-	float alphaTilda = alpha / (dt * dt);
-
 	int nSteps = 10;
 	float subdt = dt / static_cast<float>(nSteps);
+
+	float alpha = 0.001f;
+	float alphaTilda = alpha / (subdt * subdt);
 
 	for (int t = 0; t < nSteps; t++)
 	{
 		// External force
 		for (int j = 0; j < _nodeCount.y; j++)
 		{
-			_newPosition[j].y += _nodeVelocity[j].y * dt - 9.8f * dt * dt;
+			_newPosition[j].y += _nodeVelocity[j].y * subdt - 9.8f * subdt * subdt;
 		}
 
 		// Constraint projection
@@ -96,7 +97,7 @@ void PBDSimulation::_project()
 		// Update the velocity
 		for (int j = 0; j < _nodeCount.y; j++)
 		{
-			_nodeVelocity[j] = (_newPosition[j] - _nodePosition[j]) / dt;
+			_nodeVelocity[j] = (_newPosition[j] - _nodePosition[j]) / subdt;
 			_nodePosition[j] = _newPosition[j];
 		}
 
