@@ -56,6 +56,7 @@ private:
 	float _timeStep;
 	float _floorPosition;
 	float _stride;
+	float _gravity;
 
 	std::ofstream _filePBD;
 
@@ -63,5 +64,6 @@ private:
 
 	void _project();
 	float _computeHamiltonian();
+	float _computeHamiltonianGradient();
 };
 

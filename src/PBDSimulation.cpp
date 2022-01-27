@@ -11,6 +11,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	_nodeCount = { 10, 10 };
 	_floorPosition = -3.0f * _nodeCount.y;
 	_stride = 3.0f;
+	_gravity = 9.8f;
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
@@ -48,7 +49,7 @@ void PBDSimulation::_project()
 		// External force
 		for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
 		{
-			_newPosition[j].y += (subdt * _nodeVelocity[j].y) + (subdt * subdt * -9.8f);
+			_newPosition[j].y += (subdt * _nodeVelocity[j].y) + (subdt * subdt * -_gravity);
 		}
 
 		// Constraint projection
@@ -85,7 +86,7 @@ float PBDSimulation::_computeHamiltonian()
 	for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
 	{
 		H += 0.5 * (_nodeVelocity[j] * _nodeVelocity[j]);					// Kinetic energy
-		H += 9.8f * (_nodePosition[j].y - _floorPosition);	// Potential energy
+		H += _gravity * (_nodePosition[j].y - _floorPosition);	// Potential energy
 	}
 
 	for (SpringConstraint& sp : _constraint)
