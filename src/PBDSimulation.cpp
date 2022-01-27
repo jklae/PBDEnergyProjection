@@ -17,7 +17,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
 
-	_filePBD.open("filePBD.txt");
+	_filePBD.open("filePBD2.txt");
 }
 
 PBDSimulation::~PBDSimulation()
@@ -29,7 +29,7 @@ PBDSimulation::~PBDSimulation()
 void PBDSimulation::_update()
 {
 	_project();
-	//_projectHamiltonian();
+	_projectHamiltonian();
 	_filePBD << _computeHamiltonian() << endl;
 }
 
@@ -55,7 +55,7 @@ void PBDSimulation::_project()
 		}
 
 		// Constraint projection
-		for (int iter = 0; iter < 1; iter++)
+		for (int iter = 0; iter < 10; iter++)
 		{
 			for (SpringConstraint& sp : _constraint)
 			{
@@ -162,8 +162,8 @@ void PBDSimulation::_projectHamiltonian()
 			delta_x = grad_Hx * (-new_H + H) / (pow_grad_Hx + pow_grad_Hv);
 			delta_v = (1.0f / pow(h, 2.0f)) * grad_Hv * (-new_H + H) / (pow_grad_Hx + pow_grad_Hv);
 
-			_nodePosition[j].y = _nodePosition[j].y + delta_x;
-			_nodeVelocity[j].y = _nodeVelocity[j].y + delta_v;
+			_nodePosition[j] = _nodePosition[j] + delta_x;
+			_nodeVelocity[j] = _nodeVelocity[j] + delta_v;
 
 			// Floor boundary condition
 			for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
@@ -286,7 +286,6 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 	}
 
 	_hamiltonian = _computeHamiltonian();
-	_filePBD << _hamiltonian << endl;
 }
 
 void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
