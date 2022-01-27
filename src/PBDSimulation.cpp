@@ -9,17 +9,19 @@ PBDSimulation::PBDSimulation(float timeStep)
 {
 	// Float initialization
 	_nodeCount = { 10, 10 };
-	_floorPosition = -2.0f * _nodeCount.y;
+	_floorPosition = -3.0f * _nodeCount.y;
 	_stride = 3.0f;
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
 
+	_filePBD.open("filePBD.txt");
 }
 
 PBDSimulation::~PBDSimulation()
 {
+	_filePBD.close();
 }
 
 
@@ -54,7 +56,7 @@ void PBDSimulation::_project()
 		{
 			for (SpringConstraint& sp : _constraint)
 			{
-				sp.springConstraint(subdt);
+				sp.projectConstraint(subdt);
 			}
 
 			// Floor boundary condition
@@ -76,6 +78,24 @@ void PBDSimulation::_project()
 	
 }
 
+float PBDSimulation::_computeHamiltonian()
+{
+	float H = 0.0f;
+
+	for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
+	{
+		H += 0.5 * (_nodeVelocity[j] * _nodeVelocity[j]);					// Kinetic energy
+		H += 9.8f * (_nodePosition[j].y - _floorPosition);	// Potential energy
+	}
+
+	for (SpringConstraint& sp : _constraint)
+	{
+		H += sp.computeElasticEnergy();										// Elastic energy
+	}
+
+	return H;
+}
+
 
 #pragma region Implementation
 // ################################## Implementation ####################################
@@ -86,6 +106,8 @@ void PBDSimulation::iUpdate()
 	{
 		_update();
 	}
+
+	_filePBD << _computeHamiltonian() << endl;
 }
 
 void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)

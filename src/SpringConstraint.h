@@ -8,7 +8,8 @@ public:
 	~SpringConstraint();
 
 	void setLamda(DirectX::XMFLOAT2 lamda);
-	void springConstraint(float subdt);
+	void projectConstraint(float subdt);
+	float computeElasticEnergy();
 
 private:
 	DirectX::XMFLOAT2& _p1;

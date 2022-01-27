@@ -18,7 +18,7 @@ void SpringConstraint::setLamda(DirectX::XMFLOAT2 lamda)
 	_lamda = lamda;
 }
 
-void SpringConstraint::springConstraint(float subdt)
+void SpringConstraint::projectConstraint(float subdt)
 {
 	float alphaTilda = _alpha / (subdt * subdt);
 
@@ -39,4 +39,15 @@ void SpringConstraint::springConstraint(float subdt)
 	_p1 += delta_p1;
 	_p2 += delta_p2;
 	_lamda += delta_lamda;
+}
+
+float SpringConstraint::computeElasticEnergy()
+{
+	XMFLOAT2 p1_p2 = (_p1 - _p2);
+	float dist1 = sqrtf(_d.x * _d.x + _d.y * _d.y);
+	float dist2 = sqrtf(p1_p2.x * p1_p2.x + p1_p2.y * p1_p2.y);
+	float dx = dist2 - dist1;
+	float k = 1.0f / _alpha;
+
+	return 0.5f * k * (dx * dx);
 }

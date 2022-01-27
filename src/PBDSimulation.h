@@ -1,5 +1,5 @@
 #pragma once
-#include <iostream>
+#include <fstream>
 #include "SpringConstraint.h"
 #include "Win32App.h" // This includes ISimulation.h
 
@@ -57,8 +57,11 @@ private:
 	float _floorPosition;
 	float _stride;
 
+	std::ofstream _filePBD;
+
 	void _update();
 
 	void _project();
+	float _computeHamiltonian();
 };
 
