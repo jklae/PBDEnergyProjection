@@ -10,40 +10,40 @@ PBDSimulation::PBDSimulation(float timeStep)
 	// Float initialization
 	_nodeCount = { 10, 10 };
 	_floorPosition = -3.0f * _nodeCount.y;
-	_stride = 3.0f;
+	_stride = 2.0f;
 	_gravity = 9.8f;
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
 
-	_filePBD.open("filePBD2.txt");
+	//_filePBD.open("filePBD2.txt");
 }
 
 PBDSimulation::~PBDSimulation()
 {
-	_filePBD.close();
+	//_filePBD.close();
 }
 
 
 void PBDSimulation::_update()
 {
-	_project();
+	_solvePBD();
 	_projectHamiltonian();
-	_filePBD << _computeHamiltonian() << endl;
+	//_filePBD << _computeHamiltonian() << endl;
 }
 
 
-void PBDSimulation::_project()
+void PBDSimulation::_solvePBD()
 {
 	_newPosition = _nodePosition;
-	/*for (SpringConstraint& sp : _constraint)
+	for (SpringConstraint& sp : _constraint)
 	{
 		sp.setLamda(XMFLOAT2(0.0f, 0.0f));
-	}*/
+	}
 
 	float dt = _timeStep;
-	int nSteps = 10;
+	int nSteps = 20;
 	float subdt = dt / static_cast<float>(nSteps);
 
 	for (int t = 0; t < nSteps; t++)
@@ -91,17 +91,10 @@ float PBDSimulation::_computeHamiltonian()
 		H += _gravity * (_nodePosition[j].y - _floorPosition);				// Potential energy
 	}
 
-	//cout << "K, P : " << H << ",       ";
-
-	float K = 0.0f;
 	for (SpringConstraint& sp : _constraint)
 	{
-		float k1= sp.computeElasticEnergy();
-		//cout << "\nE1 : " << k1;								// Elastic energy
-		K += k1;
+		H += sp.computeElasticEnergy();										// Elastic energy
 	}
-	H += K;
-	//cout << "E : " << K << ",     total : " << H << endl;
 
 	return H;
 }

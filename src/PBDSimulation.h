@@ -58,13 +58,13 @@ private:
 	float _floorPosition;
 	float _stride;
 	float _gravity;
-	float _hamiltonian;
+	float _hamiltonian = 0.0f;
 
 	std::ofstream _filePBD;
 
 	void _update();
 
-	void _project();
+	void _solvePBD();
 	float _computeHamiltonian();
 	float _computeHamiltonianGradient(GradType gradType, int j);
 	void _projectHamiltonian();
