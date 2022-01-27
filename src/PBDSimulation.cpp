@@ -8,9 +8,9 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	// Float initialization
-	_nodeCount = { 1, 20 };
+	_nodeCount = { 10, 10 };
 	_floorPosition = -2.0f * _nodeCount.y;
-	_stride = 2.0f;
+	_stride = 3.0f;
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
@@ -44,7 +44,7 @@ void PBDSimulation::_project()
 	for (int t = 0; t < nSteps; t++)
 	{
 		// External force
-		for (int j = 0; j < _nodeCount.y; j++)
+		for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
 		{
 			_newPosition[j].y += (subdt * _nodeVelocity[j].y) + (subdt * subdt * -9.8f);
 		}
@@ -58,7 +58,7 @@ void PBDSimulation::_project()
 			}
 
 			// Floor boundary condition
-			for (int j = 0; j < _nodeCount.y; j++)
+			for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
 			{
 				if (_newPosition[j].y < _floorPosition)
 					_newPosition[j].y = _floorPosition;
@@ -66,7 +66,7 @@ void PBDSimulation::_project()
 		}
 
 		// Update the velocity
-		for (int j = 0; j < _nodeCount.y; j++)
+		for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
 		{
 			_nodeVelocity[j] = (_newPosition[j] - _nodePosition[j]) / subdt;
 			_nodePosition[j] = _newPosition[j];
@@ -147,29 +147,40 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
-		XMFLOAT2 pos = { static_cast<float>(j) * _stride, 10.0f + static_cast<float>(j) * _stride };
-		_nodePosition.push_back(pos);
-		_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
+		for (int i = 0; i < _nodeCount.x; i++)
+		{
+			XMFLOAT2 pos = { static_cast<float>(i) * _stride, 10.0f + static_cast<float>(j) * _stride };
+			_nodePosition.push_back(pos);
+			_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
-		ConstantBuffer objectCB;
-		objectCB.world = DXViewer::util::transformMatrix(pos.x, pos.y, 0.0f, 1.0f);
-		objectCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
-		objectCB.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+			ConstantBuffer objectCB;
+			objectCB.world = DXViewer::util::transformMatrix(pos.x, pos.y, 0.0f, 1.0f);
+			objectCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+			objectCB.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
 
-		constantBuffer.push_back(objectCB);
+			constantBuffer.push_back(objectCB);
+		}
 	}
 
 
 	// Constraint initialization
 	float alpha = 0.001f;
-	for (int j = 0; j < _nodeCount.y - 1; j++)
+	for (int j = 0; j < _nodeCount.x * _nodeCount.y - 1; j++)
 	{
-		XMFLOAT2& p1 = _newPosition[j];
-		XMFLOAT2& p2 = _newPosition[j + 1];
-		XMFLOAT2 d = fabsxmf2(_nodePosition[j + 1] - _nodePosition[j]);
+		for (int i = j + 1; i < _nodeCount.x * _nodeCount.y; i++)
+		{
+			XMFLOAT2& p1 = _newPosition[i];
+			XMFLOAT2& p2 = _newPosition[j];
+			XMFLOAT2 d = fabsxmf2(_nodePosition[j] - _nodePosition[i]);
+			float dist = sqrtf(d.x * d.x + d.y * d.y);
 
-		SpringConstraint sp(p1, p2, d, alpha);
-		_constraint.push_back(sp);
+			if (dist < 1.5f * _stride)
+			{
+				SpringConstraint sp(p1, p2, d, alpha);
+				_constraint.push_back(sp);
+			}
+		}
+		
 	}
 }
 
@@ -192,7 +203,7 @@ void PBDSimulation::iSetDXApp(DX12App* dxApp)
 
 UINT PBDSimulation::iGetConstantBufferSize()
 {
-	return 160;
+	return _nodeCount.x * _nodeCount.y;
 }
 
 DirectX::XMINT3 PBDSimulation::iGetObjectCount()
