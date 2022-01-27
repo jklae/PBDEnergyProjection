@@ -49,6 +49,7 @@ private:
 
 
 	//
+	enum class GradType { X, V };
 	std::vector<DirectX::XMFLOAT2> _nodePosition;
 	std::vector<DirectX::XMFLOAT2> _nodeVelocity;
 	std::vector<DirectX::XMFLOAT2> _newPosition;
@@ -57,6 +58,7 @@ private:
 	float _floorPosition;
 	float _stride;
 	float _gravity;
+	float _hamiltonian;
 
 	std::ofstream _filePBD;
 
@@ -64,6 +66,7 @@ private:
 
 	void _project();
 	float _computeHamiltonian();
-	float _computeHamiltonianGradient();
+	float _computeHamiltonianGradient(GradType gradType, int j);
+	void _projectHamiltonian();
 };
 

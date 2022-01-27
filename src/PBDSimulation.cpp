@@ -29,6 +29,8 @@ PBDSimulation::~PBDSimulation()
 void PBDSimulation::_update()
 {
 	_project();
+	//_projectHamiltonian();
+	_filePBD << _computeHamiltonian() << endl;
 }
 
 
@@ -86,15 +88,92 @@ float PBDSimulation::_computeHamiltonian()
 	for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
 	{
 		H += 0.5 * (_nodeVelocity[j] * _nodeVelocity[j]);					// Kinetic energy
-		H += _gravity * (_nodePosition[j].y - _floorPosition);	// Potential energy
+		H += _gravity * (_nodePosition[j].y - _floorPosition);				// Potential energy
 	}
 
+	//cout << "K, P : " << H << ",       ";
+
+	float K = 0.0f;
 	for (SpringConstraint& sp : _constraint)
 	{
-		H += sp.computeElasticEnergy();										// Elastic energy
+		float k1= sp.computeElasticEnergy();
+		//cout << "\nE1 : " << k1;								// Elastic energy
+		K += k1;
 	}
+	H += K;
+	//cout << "E : " << K << ",     total : " << H << endl;
 
 	return H;
+}
+
+float PBDSimulation::_computeHamiltonianGradient(GradType gradType, int j)
+{
+	float gradH = 0.0f;
+	switch (gradType)
+	{
+	case GradType::V:
+		gradH += _nodeVelocity[j].x + _nodeVelocity[j].y;
+		break;
+
+	case GradType::X:
+		gradH += _gravity;
+
+		for (SpringConstraint& sp : _constraint)
+		{
+			if (sp.getP1Index() == j)
+				gradH += sp.computeElasticEnergyGradient(j);
+			else if (sp.getP2Index() == j)
+				gradH -= sp.computeElasticEnergyGradient(j);
+		}
+		break;
+	}
+
+	return gradH;
+}
+
+void PBDSimulation::_projectHamiltonian()
+{
+	float H = _hamiltonian;
+	float delta_x = 0.0f, delta_v = 0.0f;
+	float new_H;
+	float grad_Hx, grad_Hv;
+	float pow_grad_Hx = 0.0f, pow_grad_Hv = 0.0f;
+	float h = _timeStep;
+
+	for (int iter = 0; iter < 1; iter++)
+	{
+		new_H = _computeHamiltonian();
+
+		for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
+		{
+			grad_Hx = _computeHamiltonianGradient(GradType::X, j);
+			grad_Hv = _computeHamiltonianGradient(GradType::V, j);
+
+			pow_grad_Hx += pow(grad_Hx, 2.0f);
+			pow_grad_Hv += (1.0f / pow(h, 2.0f)) * pow(grad_Hv, 2.0f);
+
+		}
+
+		for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
+		{
+			grad_Hx = _computeHamiltonianGradient(GradType::X, j);
+			grad_Hv = _computeHamiltonianGradient(GradType::V, j);
+
+			delta_x = grad_Hx * (-new_H + H) / (pow_grad_Hx + pow_grad_Hv);
+			delta_v = (1.0f / pow(h, 2.0f)) * grad_Hv * (-new_H + H) / (pow_grad_Hx + pow_grad_Hv);
+
+			_nodePosition[j].y = _nodePosition[j].y + delta_x;
+			_nodeVelocity[j].y = _nodeVelocity[j].y + delta_v;
+
+			// Floor boundary condition
+			for (int j = 0; j < _nodeCount.x * _nodeCount.y; j++)
+			{
+				if (_nodePosition[j].y < _floorPosition)
+					_nodePosition[j].y = _floorPosition;
+			}
+
+		}
+	}
 }
 
 
@@ -107,8 +186,6 @@ void PBDSimulation::iUpdate()
 	{
 		_update();
 	}
-
-	_filePBD << _computeHamiltonian() << endl;
 }
 
 void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)
@@ -192,19 +269,24 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 	{
 		for (int i = j + 1; i < _nodeCount.x * _nodeCount.y; i++)
 		{
-			XMFLOAT2& p1 = _newPosition[i];
-			XMFLOAT2& p2 = _newPosition[j];
+			XMFLOAT2& curr_p1 = _nodePosition[i];
+			XMFLOAT2& curr_p2 = _nodePosition[j];
+			XMFLOAT2& new_p1 = _newPosition[i];
+			XMFLOAT2& new_p2 = _newPosition[j];
 			XMFLOAT2 d = fabsxmf2(_nodePosition[j] - _nodePosition[i]);
 			float dist = sqrtf(d.x * d.x + d.y * d.y);
 
 			if (dist < 1.5f * _stride)
 			{
-				SpringConstraint sp(p1, p2, d, alpha);
+				SpringConstraint sp(curr_p1, curr_p2, new_p1, new_p2, i, j, d, alpha);
 				_constraint.push_back(sp);
 			}
 		}
 		
 	}
+
+	_hamiltonian = _computeHamiltonian();
+	_filePBD << _hamiltonian << endl;
 }
 
 void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
