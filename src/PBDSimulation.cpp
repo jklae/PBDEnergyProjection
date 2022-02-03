@@ -39,7 +39,7 @@ void PBDSimulation::_solvePBD()
 	_newPosition = _nodePosition;
 	for (SpringConstraint& sp : _constraint)
 	{
-		sp.setLamda(XMFLOAT2(0.0f, 0.0f));
+		sp.setLambda(XMFLOAT2(0.0f, 0.0f));
 	}
 
 	float dt = _timeStep;

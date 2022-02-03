@@ -9,7 +9,7 @@ SpringConstraint::SpringConstraint(
 	:_currentP1(currentP1), _currentP2(currentP2), _newP1(newP1), _newP2(newP2),
 	_p1Index(i), _p2Index(j), _d(d), _alpha(alpha)
 {
-	_lamda = { 0.0f, 0.0f };
+	_lambda = { 0.0f, 0.0f };
 	_k = 1.0f / _alpha;
 }
 
@@ -17,9 +17,9 @@ SpringConstraint::~SpringConstraint()
 {
 }
 
-void SpringConstraint::setLamda(DirectX::XMFLOAT2 lamda)
+void SpringConstraint::setLambda(DirectX::XMFLOAT2 lamda)
 {
-	_lamda = lamda;
+	_lambda = lamda;
 }
 
 int SpringConstraint::getP1Index()
@@ -42,19 +42,19 @@ void SpringConstraint::projectConstraint(float subdt)
 
 	XMFLOAT2 delta_p1 =
 	{
-		abs_p1_p2.x > FLT_EPSILON ? +_lamda.x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
-		abs_p1_p2.y > FLT_EPSILON ? +_lamda.y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
+		abs_p1_p2.x > FLT_EPSILON ? +_lambda.x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
+		abs_p1_p2.y > FLT_EPSILON ? +_lambda.y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
 	};
 	XMFLOAT2 delta_p2 =
 	{
-		abs_p1_p2.x > FLT_EPSILON ? -_lamda.x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
-		abs_p1_p2.y > FLT_EPSILON ? -_lamda.y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
+		abs_p1_p2.x > FLT_EPSILON ? -_lambda.x * (p1.x - p2.x) / abs_p1_p2.x : 0.0f,
+		abs_p1_p2.y > FLT_EPSILON ? -_lambda.y * (p1.y - p2.y) / abs_p1_p2.y : 0.0f
 	};
-	XMFLOAT2 delta_lamda = (-0.5f * (abs_p1_p2 - _d) - alphaTilda * _lamda) / (1.0f + alphaTilda);
+	XMFLOAT2 delta_lamda = (-0.5f * (abs_p1_p2 - _d) - alphaTilda * _lambda) / (1.0f + alphaTilda);
 
 	p1 += delta_p1;
 	p2 += delta_p2;
-	_lamda += delta_lamda;
+	_lambda += delta_lamda;
 }
 
 float SpringConstraint::computeElasticEnergy()

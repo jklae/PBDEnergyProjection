@@ -11,7 +11,7 @@ public:
 		DirectX::XMFLOAT2 d, float alpha);
 	~SpringConstraint();
 
-	void setLamda(DirectX::XMFLOAT2 lamda);
+	void setLambda(DirectX::XMFLOAT2 lamda);
 	int getP1Index();
 	int getP2Index();
 	void projectConstraint(float subdt);
@@ -25,7 +25,7 @@ private:
 	DirectX::XMFLOAT2& _newP2; // Position after the external force
 	int _p1Index, _p2Index;
 	DirectX::XMFLOAT2 _d;
-	DirectX::XMFLOAT2 _lamda;
+	DirectX::XMFLOAT2 _lambda;
 
 	float _alpha;
 	float _k;
