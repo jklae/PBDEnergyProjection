@@ -295,7 +295,7 @@ void PBDSimulation::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCo
 
 void PBDSimulation::iSetDXApp(DX12App* dxApp)
 {
-	_dxApp = dxApp;
+	_dxapp = dxApp;
 }
 
 UINT PBDSimulation::iGetConstantBufferSize()
@@ -320,16 +320,62 @@ DirectX::XMFLOAT3 PBDSimulation::iGetObjectPositionOffset()
 
 bool PBDSimulation::iIsUpdated()
 {
-	return true;
+	return _updateFlag;
 }
 
 
 void PBDSimulation::iWMCreate(HWND hwnd, HINSTANCE hInstance)
 {
+	CreateWindow(L"button", _updateFlag ? L"¡«" : L"¢º", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		65, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::PLAY), hInstance, NULL);
+	CreateWindow(L"button", L"¡á", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		115, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::STOP), hInstance, NULL);
+	CreateWindow(L"button", L"¢ºl", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		165, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::NEXTSTEP), hInstance, NULL);
+
+	/*CreateWindow(L"static", L"time :", WS_CHILD | WS_VISIBLE,
+		95, 350, 40, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
+	CreateWindow(L"static", to_wstring(_simTime).c_str(), WS_CHILD | WS_VISIBLE,
+		140, 350, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::TIME_TEXT), hInstance, NULL);
+	CreateWindow(L"static", L"frame :", WS_CHILD | WS_VISIBLE,
+		86, 370, 45, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
+	CreateWindow(L"static", to_wstring(_simFrame).c_str(), WS_CHILD | WS_VISIBLE,
+		140, 370, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::FRAME_TEXT), hInstance, NULL);*/
+
+	if (_updateFlag)
+	{
+		EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::NEXTSTEP)), false);
+	}
 }
 
 void PBDSimulation::iWMCommand(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, HINSTANCE hInstance)
 {
+	switch (LOWORD(wParam))
+	{
+		// ### Execution buttons ###
+		case static_cast<int>(COM::PLAY):
+		{
+			_updateFlag = !_updateFlag;
+			SetDlgItemText(hwnd, static_cast<int>(COM::PLAY), _updateFlag ? L"¡«" : L"¢º");
+
+			EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::STOP)), true);
+			EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::NEXTSTEP)), !_updateFlag);
+		}
+		break;
+		case static_cast<int>(COM::STOP):
+		{
+			_dxapp->resetSimulationState();
+		}
+		break;
+		case static_cast<int>(COM::NEXTSTEP):
+		{
+			iUpdate();
+			_dxapp->update();
+			_dxapp->draw();
+		}
+		break;
+		// #####################
+	}
 }
 
 void PBDSimulation::iWMHScroll(HWND hwnd, WPARAM wParam, LPARAM lParam, HINSTANCE hInstance)

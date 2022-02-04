@@ -41,8 +41,15 @@ public:
 	// #######################################################################################
 
 private:
+	enum class COM
+	{
+		PLAY, STOP, NEXTSTEP,
+		TIME_TEXT, FRAME_TEXT
+	};
+
 	DirectX::XMINT2 _nodeCount;
-	DX12App* _dxApp = nullptr;
+	DX12App* _dxapp = nullptr;
+	float _updateFlag = true;
 
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
