@@ -8,8 +8,8 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	// Float initialization
-	_nodeCount = { 10, 10 };
-	_floorPosition = -3.0f * _nodeCount.y;
+	_nodeCount = { 8, 8 };
+	_floorPosition = -2.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;
 
@@ -331,7 +331,7 @@ DirectX::XMINT3 PBDSimulation::iGetObjectCount()
 
 DirectX::XMFLOAT3 PBDSimulation::iGetObjectSize()
 {
-	return { 1.0f, 1.0f, 0.0f };
+	return { _stride, _stride, 0.0f };
 }
 
 DirectX::XMFLOAT3 PBDSimulation::iGetObjectPositionOffset()
