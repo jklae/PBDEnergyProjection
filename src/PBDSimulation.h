@@ -43,6 +43,7 @@ public:
 private:
 	enum class COM
 	{
+		PROJ_BTN,
 		PLAY, STOP, NEXTSTEP,
 		TIME_TEXT, FRAME_TEXT
 	};
@@ -66,6 +67,7 @@ private:
 	float _stride;
 	float _gravity;
 	float _hamiltonian = 0.0f;
+	bool _projFlag = false;
 
 	std::ofstream _filePBD;
 

@@ -8,7 +8,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	// Float initialization
-	_nodeCount = { 7, 7 };
+	_nodeCount = { 10, 10 };
 	_floorPosition = -3.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;
@@ -29,7 +29,7 @@ PBDSimulation::~PBDSimulation()
 void PBDSimulation::_update()
 {
 	_solvePBD();
-	_projectHamiltonian();
+	if (_projFlag) _projectHamiltonian();
 	//_filePBD << _computeHamiltonian() << endl;
 }
 
@@ -40,7 +40,17 @@ void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
 	{
 		for (int i = 0; i < _nodeCount.x; i++)
 		{
-			XMFLOAT2 pos = { static_cast<float>(i) * _stride, 10.0f + static_cast<float>(j) * _stride };
+			float offsetX = 0.0f;
+			float offsetY = 10.0f;
+
+			float f_i = static_cast<float>(i);
+			float f_j = static_cast<float>(j);
+
+			XMFLOAT2 pos = 
+			{ 
+				offsetX + f_i * _stride, 
+				offsetY + f_j * _stride
+			};
 			_nodePosition.push_back(pos);
 			_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
 
@@ -337,6 +347,9 @@ bool PBDSimulation::iIsUpdated()
 
 void PBDSimulation::iWMCreate(HWND hwnd, HINSTANCE hInstance)
 {
+	CreateWindow(L"button", _projFlag ? L"Proj : ON " : L"Proj : OFF ", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		90, 30, 100, 25, hwnd, reinterpret_cast<HMENU>(COM::PROJ_BTN), hInstance, NULL);
+
 	CreateWindow(L"button", _updateFlag ? L"бл" : L"в║", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		65, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::PLAY), hInstance, NULL);
 	CreateWindow(L"button", L"бс", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -363,6 +376,14 @@ void PBDSimulation::iWMCommand(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam
 {
 	switch (LOWORD(wParam))
 	{
+		case static_cast<int>(COM::PROJ_BTN):
+		{
+			_projFlag = !_projFlag;
+			SetDlgItemText(hwnd, static_cast<int>(COM::PROJ_BTN), _projFlag ? L"Proj : ON " : L"Proj : OFF");
+			_dxapp->resetSimulationState();
+		}
+		break;
+
 		// ### Execution buttons ###
 		case static_cast<int>(COM::PLAY):
 		{
