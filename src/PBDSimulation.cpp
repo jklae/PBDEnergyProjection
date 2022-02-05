@@ -8,7 +8,7 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	// Float initialization
-	_nodeCount = { 10, 10 };
+	_nodeCount = { 7, 7 };
 	_floorPosition = -3.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;
@@ -33,6 +33,27 @@ void PBDSimulation::_update()
 	//_filePBD << _computeHamiltonian() << endl;
 }
 
+
+void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
+{
+	for (int j = 0; j < _nodeCount.y; j++)
+	{
+		for (int i = 0; i < _nodeCount.x; i++)
+		{
+			XMFLOAT2 pos = { static_cast<float>(i) * _stride, 10.0f + static_cast<float>(j) * _stride };
+			_nodePosition.push_back(pos);
+			_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
+
+			ConstantBuffer objectCB;
+			objectCB.world = DXViewer::util::transformMatrix(pos.x, pos.y, 0.0f, 1.0f);
+			objectCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+			objectCB.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
+
+			constantBuffer.push_back(objectCB);
+		}
+	}
+
+}
 
 void PBDSimulation::_solvePBD()
 {
@@ -183,6 +204,11 @@ void PBDSimulation::iUpdate()
 
 void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)
 {
+	_nodePosition.clear();
+	_nodeVelocity.clear();
+	constantBuffer.clear();
+
+	_initializeNode(constantBuffer);
 }
 
 
@@ -238,22 +264,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 		constantBuffer.push_back(objectCB);
 	}*/
 
-	for (int j = 0; j < _nodeCount.y; j++)
-	{
-		for (int i = 0; i < _nodeCount.x; i++)
-		{
-			XMFLOAT2 pos = { static_cast<float>(i) * _stride, 10.0f + static_cast<float>(j) * _stride };
-			_nodePosition.push_back(pos);
-			_nodeVelocity.push_back(XMFLOAT2(0.0f, 0.0f));
-
-			ConstantBuffer objectCB;
-			objectCB.world = DXViewer::util::transformMatrix(pos.x, pos.y, 0.0f, 1.0f);
-			objectCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
-			objectCB.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-			constantBuffer.push_back(objectCB);
-		}
-	}
+	_initializeNode(constantBuffer);
 
 
 	// Constraint initialization
