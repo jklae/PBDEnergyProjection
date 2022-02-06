@@ -15,9 +15,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, in
 
     DX12App* dxapp = new DX12App();
     dxapp->setCameraProperties(
-        PROJ::PERSPECTIVE, 
-        0.0f,               // orthogonal distance
-        10.0f, 0.0f, 0.0f);  // radius, theta, phi
+        PROJ::ORTHOGRAPHIC,
+        0.15f, 2.0f, 0.0f, 0.0f);
     dxapp->setBackgroundColor(DirectX::Colors::Black);
 
     Win32App winApp(500, 500);

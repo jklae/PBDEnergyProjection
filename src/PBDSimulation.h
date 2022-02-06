@@ -68,6 +68,7 @@ private:
 	float _gravity;
 	float _hamiltonian = 0.0f;
 	bool _projFlag = false;
+	int _lineCount;
 
 	std::ofstream _filePBD;
 

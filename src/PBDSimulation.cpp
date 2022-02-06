@@ -8,10 +8,11 @@ PBDSimulation::PBDSimulation(float timeStep)
 	:_timeStep(timeStep)
 {
 	// Float initialization
-	_nodeCount = { 8, 8 };
+	_nodeCount = { 10, 10 };
 	_floorPosition = -2.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;
+	_lineCount = 50;
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
@@ -36,6 +37,7 @@ void PBDSimulation::_update()
 
 void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
 {
+	// Body initialization
 	for (int j = 0; j < _nodeCount.y; j++)
 	{
 		for (int i = 0; i < _nodeCount.x; i++)
@@ -63,6 +65,26 @@ void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
 		}
 	}
 
+
+	// Floor, Line initialization
+	for (int i = 0; i < _lineCount * 2; i++)
+	{
+		float x = static_cast<float>(-_lineCount + i);
+		ConstantBuffer floorCB, lineCB;
+
+		floorCB.world = DXViewer::util::transformMatrix(
+			x, _floorPosition - 1.0f, 0.0f, 1.0f);
+		floorCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+		floorCB.color = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+
+		lineCB.world = DXViewer::util::transformMatrix(
+			x, 1.0f, 0.0f, 1.0f);
+		lineCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+		lineCB.color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+		constantBuffer.push_back(floorCB);
+		constantBuffer.push_back(lineCB);
+	}
 }
 
 void PBDSimulation::_solvePBD()
@@ -262,20 +284,8 @@ UINT PBDSimulation::iGetIndexBufferSize()
 // DirectX methods
 void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 {
-	/*int floorCount = 80;
-	for (int i = 0; i < floorCount * 2; i++)
-	{
-		ConstantBuffer objectCB;
-
-		objectCB.world = transformMatrix(static_cast<float>(-floorCount + i), 0.0f, 0.0f, 1.0f);
-		objectCB.worldViewProj = transformMatrix(0.0f, 0.0f, 0.0f);
-		objectCB.color = XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f);
-
-		constantBuffer.push_back(objectCB);
-	}*/
-
+	// Node initialization
 	_initializeNode(constantBuffer);
-
 
 	// Constraint initialization
 	float alpha = 0.001f;
@@ -299,13 +309,20 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 		
 	}
 
+	// Hamiltonian initialization
 	_hamiltonian = _computeHamiltonian();
+
 }
 
 void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
 {
-	constantBuffer[i].world._41 = _nodePosition[i].x;
-	constantBuffer[i].world._42 = _nodePosition[i].y;
+	int nodeCount = _nodeCount.x * _nodeCount.y;
+
+	if (i < nodeCount)
+	{
+		constantBuffer[i].world._41 = _nodePosition[i].x;
+		constantBuffer[i].world._42 = _nodePosition[i].y;
+	}
 }
 
 void PBDSimulation::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)
@@ -321,7 +338,10 @@ void PBDSimulation::iSetDXApp(DX12App* dxApp)
 
 UINT PBDSimulation::iGetConstantBufferSize()
 {
-	return _nodeCount.x * _nodeCount.y;
+	return 
+		_nodeCount.x * _nodeCount.y		// Body
+		+ (_lineCount * 2)				// Floor
+		+ (_lineCount * 2);				// Line
 }
 
 DirectX::XMINT3 PBDSimulation::iGetObjectCount()
