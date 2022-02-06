@@ -4,11 +4,11 @@ using namespace DirectX;
 using namespace std;
 using namespace DXViewer::xmfloat2;
 
-PBDSimulation::PBDSimulation(float timeStep)
+PBDSimulation::PBDSimulation(int x, int y, float timeStep)
 	:_timeStep(timeStep)
 {
 	// Float initialization
-	_nodeCount = { 10, 10 };
+	_nodeCount = { x, y };
 	_floorPosition = -2.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;

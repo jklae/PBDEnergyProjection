@@ -6,7 +6,7 @@
 class PBDSimulation : public ISimulation
 {
 public:
-	PBDSimulation(float timeStep);
+	PBDSimulation(int x, int y, float timeStep);
 	~PBDSimulation();
 
 #pragma region Implementation
