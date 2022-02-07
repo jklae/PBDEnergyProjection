@@ -3,7 +3,7 @@
 #include "SpringConstraint.h"
 #include "Win32App.h" // This includes ISimulation.h
 
-class PBDSimulation : public ISimulation
+class PBDSimulation
 {
 public:
 	PBDSimulation(int x, int y, float timeStep);
@@ -12,48 +12,28 @@ public:
 #pragma region Implementation
 	// ################################## Implementation ####################################
 	// Simulation methods
-	void iUpdate() override;
-	void iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer) override;
+	void iUpdate(bool projFlag);
+	void iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer);
 
 	// Mesh methods
-	std::vector<Vertex>& iGetVertice() override;
-	std::vector<unsigned int>& iGetIndice() override;
-	UINT iGetVertexBufferSize() override;
-	UINT iGetIndexBufferSize() override;
+	std::vector<Vertex>& iGetVertice();
+	std::vector<unsigned int>& iGetIndice();
+	UINT iGetVertexBufferSize();
+	UINT iGetIndexBufferSize();
 
 	// DirectX methods
-	void iCreateObject(std::vector<ConstantBuffer>& constantBuffer) override;
-	void iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i) override;
-	void iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i) override;
-	void iSetDXApp(DX12App* dxApp) override;
-	UINT iGetConstantBufferSize() override;
-	DirectX::XMINT3 iGetObjectCount() override;
-	DirectX::XMFLOAT3 iGetObjectSize() override;
-	DirectX::XMFLOAT3 iGetObjectPositionOffset() override;
-	bool iIsUpdated() override;
-
-	// WndProc methods
-	void iWMCreate(HWND hwnd, HINSTANCE hInstance) override;
-	void iWMCommand(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, HINSTANCE hInstance) override;
-	void iWMHScroll(HWND hwnd, WPARAM wParam, LPARAM lParam, HINSTANCE hInstance) override;
-	void iWMTimer(HWND hwnd) override;
-	void iWMDestory(HWND hwnd) override;
+	void iCreateObject(std::vector<ConstantBuffer>& constantBuffer);
+	void iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i);
+	void iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i);
+	UINT iGetConstantBufferSize();
+	DirectX::XMINT3 iGetObjectCount();
+	DirectX::XMFLOAT3 iGetObjectSize();
+	DirectX::XMFLOAT3 iGetObjectPositionOffset();
 	// #######################################################################################
 
 private:
-	enum class COM
-	{
-		PROJ_BTN,
-		PLAY, STOP, NEXTSTEP,
-		TIME_TEXT, FRAME_TEXT
-	};
-
 	//
 	DirectX::XMINT2 _nodeCount;
-	DX12App* _dxapp = nullptr;
-	float _updateFlag = true;
-	clock_t _simTime = 0;
-	int _simFrame = 0;
 
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
@@ -70,14 +50,13 @@ private:
 	float _stride;
 	float _gravity;
 	float _hamiltonian = 0.0f;
-	bool _projFlag = false;
 	int _lineCount;
 	float _alpha;
 	DirectX::XMFLOAT2 _posOffset;
 
 	std::ofstream _filePBD;
 
-	void _update();
+	void _update(bool projFlag);
 
 	void _initializeNode(std::vector<ConstantBuffer>& constantBuffer);
 	void _solvePBD();
