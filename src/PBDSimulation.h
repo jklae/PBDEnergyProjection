@@ -69,6 +69,7 @@ private:
 	float _hamiltonian = 0.0f;
 	bool _projFlag = false;
 	int _lineCount;
+	DirectX::XMFLOAT2 _posOffset;
 
 	std::ofstream _filePBD;
 
