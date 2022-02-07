@@ -48,9 +48,12 @@ private:
 		TIME_TEXT, FRAME_TEXT
 	};
 
+	//
 	DirectX::XMINT2 _nodeCount;
 	DX12App* _dxapp = nullptr;
 	float _updateFlag = true;
+	clock_t _simTime = 0;
+	int _simFrame = 0;
 
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
@@ -69,6 +72,7 @@ private:
 	float _hamiltonian = 0.0f;
 	bool _projFlag = false;
 	int _lineCount;
+	float _alpha;
 	DirectX::XMFLOAT2 _posOffset;
 
 	std::ofstream _filePBD;

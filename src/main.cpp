@@ -12,7 +12,7 @@ using namespace DXViewer::xmint3;
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
     int x = 10;
-    int y = 10;
+    int y = 20;
     float dt = 0.01f;
     PBDSimulation* fluidsim = new PBDSimulation(x, y, dt);
 

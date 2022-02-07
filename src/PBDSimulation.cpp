@@ -8,13 +8,14 @@ using namespace DXViewer::xmint2;
 PBDSimulation::PBDSimulation(int x, int y, float timeStep)
 	:_timeStep(timeStep)
 {
-	// Float initialization
+	// Int, Float initialization
 	_nodeCount = { x, y };
 	_floorPosition = -2.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;
 	_lineCount = max_element(_nodeCount) * 5;
 	_posOffset = { 0.0f, static_cast<float>(max_element(_nodeCount)) };
+	_alpha = 0.001f; // Inverse k
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
@@ -227,10 +228,15 @@ void PBDSimulation::_projectHamiltonian()
 // Simulation methods
 void PBDSimulation::iUpdate()
 {
+	clock_t startTime = clock();
 	for (int i = 0; i < 1; i++)
 	{
 		_update();
 	}
+	clock_t endTime = clock();
+
+	_simTime += endTime - startTime; // ms
+	_simFrame++;
 }
 
 void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)
@@ -240,6 +246,9 @@ void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantB
 	constantBuffer.clear();
 
 	_initializeNode(constantBuffer);
+
+	_simTime = 0;
+	_simFrame = 0;
 }
 
 
@@ -287,7 +296,6 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 	_initializeNode(constantBuffer);
 
 	// Constraint initialization
-	float alpha = 0.001f;
 	for (int j = 0; j < _nodeCount.x * _nodeCount.y - 1; j++)
 	{
 		for (int i = j + 1; i < _nodeCount.x * _nodeCount.y; i++)
@@ -301,7 +309,7 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 			if (dist < 1.5f * _stride)
 			{
-				SpringConstraint sp(curr_p1, curr_p2, new_p1, new_p2, i, j, d, alpha);
+				SpringConstraint sp(curr_p1, curr_p2, new_p1, new_p2, i, j, d, _alpha);
 				_constraint.push_back(sp);
 			}
 		}
@@ -376,19 +384,21 @@ void PBDSimulation::iWMCreate(HWND hwnd, HINSTANCE hInstance)
 	CreateWindow(L"button", L"¢ºl", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		165, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::NEXTSTEP), hInstance, NULL);
 
-	/*CreateWindow(L"static", L"time :", WS_CHILD | WS_VISIBLE,
+	CreateWindow(L"static", L"time :", WS_CHILD | WS_VISIBLE,
 		95, 350, 40, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
 	CreateWindow(L"static", to_wstring(_simTime).c_str(), WS_CHILD | WS_VISIBLE,
 		140, 350, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::TIME_TEXT), hInstance, NULL);
 	CreateWindow(L"static", L"frame :", WS_CHILD | WS_VISIBLE,
 		86, 370, 45, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
 	CreateWindow(L"static", to_wstring(_simFrame).c_str(), WS_CHILD | WS_VISIBLE,
-		140, 370, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::FRAME_TEXT), hInstance, NULL);*/
+		140, 370, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::FRAME_TEXT), hInstance, NULL);
 
 	if (_updateFlag)
 	{
 		EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::NEXTSTEP)), false);
 	}
+
+	SetTimer(hwnd, 1, 10, NULL);
 }
 
 void PBDSimulation::iWMCommand(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam, HINSTANCE hInstance)
@@ -435,10 +445,13 @@ void PBDSimulation::iWMHScroll(HWND hwnd, WPARAM wParam, LPARAM lParam, HINSTANC
 
 void PBDSimulation::iWMTimer(HWND hwnd)
 {
+	SetDlgItemText(hwnd, static_cast<int>(COM::TIME_TEXT), to_wstring(_simTime).c_str());
+	SetDlgItemText(hwnd, static_cast<int>(COM::FRAME_TEXT), to_wstring(_simFrame).c_str());
 }
 
 void PBDSimulation::iWMDestory(HWND hwnd)
 {
+	KillTimer(hwnd, 1);
 }
 // #######################################################################################
 #pragma endregion

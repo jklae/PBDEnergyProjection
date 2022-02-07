@@ -79,7 +79,6 @@ float SpringConstraint::_computeDx()
 	float dist1 = sqrtf(_d.x * _d.x + _d.y * _d.y);
 	float dist2 = sqrtf(p1_p2.x * p1_p2.x + p1_p2.y * p1_p2.y);
 	float dx = fabsf(dist2 - dist1);
-	//cout << " dist1 = " << dist1 << "  dist2 = " << dist2 << "  dx = " << dx;
 
 	return dx;
 }
