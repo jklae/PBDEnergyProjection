@@ -47,8 +47,11 @@ void SimulationManager::_createLine(std::vector<ConstantBuffer>& constantBuffer)
 void SimulationManager::iUpdate()
 {
 	clock_t startTime = clock();
-	_sim[0]->iUpdate();
-	_sim[1]->iUpdate();
+	for (int i = 0; i < 1; i++)
+	{
+		_sim[0]->iUpdate();
+		_sim[1]->iUpdate();
+	}
 	clock_t endTime = clock();
 
 	_simTime += endTime - startTime; // ms
@@ -58,6 +61,7 @@ void SimulationManager::iUpdate()
 void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)
 {
 	constantBuffer.clear();
+
 	_sim[0]->iResetSimulationState(constantBuffer);
 	_sim[1]->iResetSimulationState(constantBuffer);
 

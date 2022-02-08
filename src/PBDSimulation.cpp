@@ -13,7 +13,7 @@ PBDSimulation::PBDSimulation(int x, int y, float timeStep,
 	_nodeCount = { x, y };
 	_stride = 2.0f;
 	_gravity = 9.8f;
-	_alpha = 0.001f; // Inverse k
+	_alpha = 0.002f; // Inverse k
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
