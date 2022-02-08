@@ -87,7 +87,8 @@ void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& const
 
 void SimulationManager::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)
 {
-	_sim[0]->iDraw(mCommandList, size, indexCount, i);
+	mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	mCommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 }
 
 void SimulationManager::iSetDXApp(DX12App* dxApp)

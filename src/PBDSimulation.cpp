@@ -275,12 +275,6 @@ void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantB
 	}
 }
 
-void PBDSimulation::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)
-{
-	mCommandList->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	mCommandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
-}
-
 UINT PBDSimulation::iGetConstantBufferSize()
 {
 	return 
