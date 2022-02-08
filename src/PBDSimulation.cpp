@@ -11,20 +11,17 @@ PBDSimulation::PBDSimulation(int x, int y, float timeStep,
 {
 	// Int, Float initialization
 	_nodeCount = { x, y };
-	_stride = 2.0f;
+	_stride = 2.5f;
 	_gravity = 9.8f;
 	_alpha = 0.002f; // Inverse k
 
 	// Vector initialization
 	size_t vSize = static_cast<size_t>(_nodeCount.x) * static_cast<size_t>(_nodeCount.y);
 	_newPosition.assign(vSize, { 0.0f, 0.0f });
-
-	//_filePBD.open("filePBD2.txt");
 }
 
 PBDSimulation::~PBDSimulation()
 {
-	//_filePBD.close();
 }
 
 void PBDSimulation::_createNode(std::vector<ConstantBuffer>& constantBuffer)
@@ -198,7 +195,6 @@ void PBDSimulation::iUpdate()
 {
 	_solvePBD();
 	if (_projFlag) _projectHamiltonian();
-	//_filePBD << _computeHamiltonian() << endl;
 }
 
 void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)

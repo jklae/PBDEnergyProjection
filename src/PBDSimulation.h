@@ -44,8 +44,6 @@ private:
 	bool _projFlag;
 	DirectX::XMFLOAT2 _posOffset;
 
-	std::ofstream _filePBD;
-
 	void _createNode(std::vector<ConstantBuffer>& constantBuffer);
 	void _solvePBD();
 	float _computeHamiltonian();
