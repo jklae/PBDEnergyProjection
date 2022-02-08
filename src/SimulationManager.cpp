@@ -9,15 +9,37 @@ SimulationManager::SimulationManager(int x, int y, float timeStep)
 	_floorPosition = -2.0f * y;
 
 	_sim.push_back(new PBDSimulation(x, y, timeStep, 
-		false, XMFLOAT2(-maxCount, maxCount), _floorPosition));
+		false, XMFLOAT2(-maxCount * 1.5f, maxCount), _floorPosition));
 	_sim.push_back(new PBDSimulation(x, y, timeStep, 
-		true, XMFLOAT2(+maxCount, maxCount), _floorPosition));
+		true, XMFLOAT2(+maxCount * 1.5f, maxCount), _floorPosition));
 }
 
 SimulationManager::~SimulationManager()
 {
 }
 
+void SimulationManager::_createLine(std::vector<ConstantBuffer>& constantBuffer)
+{
+	// Floor, Line initialization
+	for (int i = 0; i < _lineCount * 2; i++)
+	{
+		float x = static_cast<float>(-_lineCount + i);
+		ConstantBuffer floorCB, lineCB;
+
+		floorCB.world = DXViewer::util::transformMatrix(
+			x, _floorPosition - 1.0f, 0.0f, 1.0f);
+		floorCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+		floorCB.color = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+
+		lineCB.world = DXViewer::util::transformMatrix(
+			x, -_floorPosition, 0.0f, 1.0f);
+		lineCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+		lineCB.color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+		constantBuffer.push_back(floorCB);
+		constantBuffer.push_back(lineCB);
+	}
+}
 
 #pragma region Implementation
 // ################################## Implementation ####################################
@@ -35,7 +57,11 @@ void SimulationManager::iUpdate()
 
 void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)
 {
+	constantBuffer.clear();
 	_sim[0]->iResetSimulationState(constantBuffer);
+	_sim[1]->iResetSimulationState(constantBuffer);
+
+	_createLine(constantBuffer);
 
 	_simTime = 0;
 	_simFrame = 0;
@@ -85,26 +111,7 @@ void SimulationManager::iCreateObject(std::vector<ConstantBuffer>& constantBuffe
 	_sim[0]->iCreateObject(constantBuffer);
 	_sim[1]->iCreateObject(constantBuffer);
 
-
-	// Floor, Line initialization
-	for (int i = 0; i < _lineCount * 2; i++)
-	{
-		float x = static_cast<float>(-_lineCount + i);
-		ConstantBuffer floorCB, lineCB;
-
-		floorCB.world = DXViewer::util::transformMatrix(
-			x, _floorPosition - 1.0f, 0.0f, 1.0f);
-		floorCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
-		floorCB.color = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-
-		lineCB.world = DXViewer::util::transformMatrix(
-			x, -_floorPosition, 0.0f, 1.0f);
-		lineCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
-		lineCB.color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-
-		constantBuffer.push_back(floorCB);
-		constantBuffer.push_back(lineCB);
-	}
+	_createLine(constantBuffer);
 }
 
 void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)

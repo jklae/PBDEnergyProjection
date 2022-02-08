@@ -27,7 +27,7 @@ PBDSimulation::~PBDSimulation()
 	//_filePBD.close();
 }
 
-void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
+void PBDSimulation::_createNode(std::vector<ConstantBuffer>& constantBuffer)
 {
 	// Body initialization
 	for (int j = 0; j < _nodeCount.y; j++)
@@ -205,16 +205,15 @@ void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantB
 {
 	_nodePosition.clear();
 	_nodeVelocity.clear();
-	constantBuffer.clear();
 
-	_initializeNode(constantBuffer);
+	_createNode(constantBuffer);
 }
 
 // DirectX methods
 void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 {
 	// Node initialization
-	_initializeNode(constantBuffer);
+	_createNode(constantBuffer);
 
 	// Constraint initialization
 	for (int j = 0; j < _nodeCount.x * _nodeCount.y - 1; j++)

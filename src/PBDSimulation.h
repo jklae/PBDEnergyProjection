@@ -46,7 +46,7 @@ private:
 
 	std::ofstream _filePBD;
 
-	void _initializeNode(std::vector<ConstantBuffer>& constantBuffer);
+	void _createNode(std::vector<ConstantBuffer>& constantBuffer);
 	void _solvePBD();
 	float _computeHamiltonian();
 	float _computeHamiltonianGradient(GradType gradType, int j);
