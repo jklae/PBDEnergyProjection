@@ -15,12 +15,6 @@ public:
 	void iUpdate();
 	void iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer);
 
-	// Mesh methods
-	std::vector<Vertex>& iGetVertice();
-	std::vector<unsigned int>& iGetIndice();
-	UINT iGetVertexBufferSize();
-	UINT iGetIndexBufferSize();
-
 	// DirectX methods
 	void iCreateObject(std::vector<ConstantBuffer>& constantBuffer);
 	void iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i);
@@ -34,8 +28,6 @@ public:
 private:
 	//
 	DirectX::XMINT2 _nodeCount;
-	std::vector<Vertex> _vertices;
-	std::vector<unsigned int> _indices;
 
 	//
 	enum class GradType { X, V };

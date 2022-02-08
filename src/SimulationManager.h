@@ -51,6 +51,8 @@ private:
 	clock_t _simTime = 0;
 	int _simFrame = 0;
 
+	std::vector<Vertex> _vertices;
+	std::vector<unsigned int> _indices;
 	std::vector<PBDSimulation*> _sim;
 };
 

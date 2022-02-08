@@ -232,44 +232,6 @@ void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantB
 	_initializeNode(constantBuffer);
 }
 
-
-// Mesh methods
-vector<Vertex>& PBDSimulation::iGetVertice()
-{
-	_vertices =
-	{
-		Vertex({ XMFLOAT3(-0.5f, -0.5f, 0.0f) }),
-		Vertex({ XMFLOAT3(-0.5f, +0.5f, 0.0f) }),
-		Vertex({ XMFLOAT3(+0.5f, +0.5f, 0.0f) }),
-		Vertex({ XMFLOAT3(+0.5f, -0.5f, 0.0f) })
-	};
-
-	return _vertices;
-}
-
-vector<unsigned int>& PBDSimulation::iGetIndice()
-{
-	_indices =
-	{
-		// front face
-		0, 1, 2,
-		0, 2, 3,
-	};
-
-	return _indices;
-}
-
-UINT PBDSimulation::iGetVertexBufferSize()
-{
-	return 4;
-}
-
-UINT PBDSimulation::iGetIndexBufferSize()
-{
-	return 6;
-}
-
-
 // DirectX methods
 void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 {

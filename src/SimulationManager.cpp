@@ -6,6 +6,7 @@ SimulationManager::SimulationManager(int x, int y, float timeStep)
 {
 	float maxCount = static_cast<float>(max(x, y));
 	XMFLOAT2 posOffset = { -maxCount, maxCount };
+
 	_sim.push_back(new PBDSimulation(x, y, timeStep, false, posOffset));
 }
 
@@ -39,22 +40,37 @@ void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& const
 // Mesh methods
 vector<Vertex>& SimulationManager::iGetVertice()
 {
-	return _sim[0]->iGetVertice();
+	_vertices =
+	{
+		Vertex({ XMFLOAT3(-0.5f, -0.5f, 0.0f) }),
+		Vertex({ XMFLOAT3(-0.5f, +0.5f, 0.0f) }),
+		Vertex({ XMFLOAT3(+0.5f, +0.5f, 0.0f) }),
+		Vertex({ XMFLOAT3(+0.5f, -0.5f, 0.0f) })
+	};
+
+	return _vertices;
 }
 
 vector<unsigned int>& SimulationManager::iGetIndice()
 {
-	return _sim[0]->iGetIndice();
+	_indices =
+	{
+		// front face
+		0, 1, 2,
+		0, 2, 3,
+	};
+
+	return _indices;
 }
 
 UINT SimulationManager::iGetVertexBufferSize()
 {
-	return _sim[0]->iGetVertexBufferSize();
+	return 4;
 }
 
 UINT SimulationManager::iGetIndexBufferSize()
 {
-	return _sim[0]->iGetIndexBufferSize();
+	return 6;
 }
 
 
