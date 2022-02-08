@@ -5,8 +5,8 @@ using namespace std;
 using namespace DXViewer::xmfloat2;
 using namespace DXViewer::xmint2;
 
-PBDSimulation::PBDSimulation(int x, int y, float timeStep)
-	:_timeStep(timeStep)
+PBDSimulation::PBDSimulation(int x, int y, float timeStep, bool projFlag)
+	:_timeStep(timeStep), _projFlag(projFlag)
 {
 	// Int, Float initialization
 	_nodeCount = { x, y };
@@ -28,15 +28,6 @@ PBDSimulation::~PBDSimulation()
 {
 	//_filePBD.close();
 }
-
-
-void PBDSimulation::_update(bool projFlag)
-{
-	_solvePBD();
-	if (projFlag) _projectHamiltonian();
-	//_filePBD << _computeHamiltonian() << endl;
-}
-
 
 void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
 {
@@ -226,9 +217,11 @@ void PBDSimulation::_projectHamiltonian()
 #pragma region Implementation
 // ################################## Implementation ####################################
 // Simulation methods
-void PBDSimulation::iUpdate(bool projFlag)
+void PBDSimulation::iUpdate()
 {
-	_update(projFlag);
+	_solvePBD();
+	if (_projFlag) _projectHamiltonian();
+	//_filePBD << _computeHamiltonian() << endl;
 }
 
 void PBDSimulation::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)

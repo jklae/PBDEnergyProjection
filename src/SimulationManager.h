@@ -42,7 +42,6 @@ public:
 private:
 	enum class COM
 	{
-		PROJ_BTN,
 		PLAY, STOP, NEXTSTEP,
 		TIME_TEXT, FRAME_TEXT
 	};
@@ -52,7 +51,6 @@ private:
 	clock_t _simTime = 0;
 	int _simFrame = 0;
 
-	PBDSimulation* _sim;
-	bool _projFlag = false;
+	std::vector<PBDSimulation*> _sim;
 };
 

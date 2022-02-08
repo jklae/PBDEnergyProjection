@@ -6,13 +6,13 @@
 class PBDSimulation
 {
 public:
-	PBDSimulation(int x, int y, float timeStep);
+	PBDSimulation(int x, int y, float timeStep, bool projFlag);
 	~PBDSimulation();
 
 #pragma region Implementation
 	// ################################## Implementation ####################################
 	// Simulation methods
-	void iUpdate(bool projFlag);
+	void iUpdate();
 	void iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer);
 
 	// Mesh methods
@@ -34,10 +34,8 @@ public:
 private:
 	//
 	DirectX::XMINT2 _nodeCount;
-
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
-
 
 	//
 	enum class GradType { X, V };
@@ -52,11 +50,10 @@ private:
 	float _hamiltonian = 0.0f;
 	int _lineCount;
 	float _alpha;
+	bool _projFlag;
 	DirectX::XMFLOAT2 _posOffset;
 
 	std::ofstream _filePBD;
-
-	void _update(bool projFlag);
 
 	void _initializeNode(std::vector<ConstantBuffer>& constantBuffer);
 	void _solvePBD();

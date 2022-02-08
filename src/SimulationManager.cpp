@@ -4,12 +4,11 @@ using namespace std;
 
 SimulationManager::SimulationManager(int x, int y, float timeStep)
 {
-	_sim = new PBDSimulation(x, y, timeStep);
+	_sim.push_back(new PBDSimulation(x, y, timeStep, false));
 }
 
 SimulationManager::~SimulationManager()
 {
-	delete _sim;
 }
 
 
@@ -19,7 +18,7 @@ SimulationManager::~SimulationManager()
 void SimulationManager::iUpdate()
 {
 	clock_t startTime = clock();
-	_sim->iUpdate(_projFlag);
+	_sim[0]->iUpdate();
 	clock_t endTime = clock();
 
 	_simTime += endTime - startTime; // ms
@@ -28,7 +27,7 @@ void SimulationManager::iUpdate()
 
 void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& constantBuffer)
 {
-	_sim->iResetSimulationState(constantBuffer);
+	_sim[0]->iResetSimulationState(constantBuffer);
 
 	_simTime = 0;
 	_simFrame = 0;
@@ -38,39 +37,39 @@ void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& const
 // Mesh methods
 vector<Vertex>& SimulationManager::iGetVertice()
 {
-	return _sim->iGetVertice();
+	return _sim[0]->iGetVertice();
 }
 
 vector<unsigned int>& SimulationManager::iGetIndice()
 {
-	return _sim->iGetIndice();
+	return _sim[0]->iGetIndice();
 }
 
 UINT SimulationManager::iGetVertexBufferSize()
 {
-	return _sim->iGetVertexBufferSize();
+	return _sim[0]->iGetVertexBufferSize();
 }
 
 UINT SimulationManager::iGetIndexBufferSize()
 {
-	return _sim->iGetIndexBufferSize();
+	return _sim[0]->iGetIndexBufferSize();
 }
 
 
 // DirectX methods
 void SimulationManager::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 {
-	_sim->iCreateObject(constantBuffer);
+	_sim[0]->iCreateObject(constantBuffer);
 }
 
 void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
 {
-	_sim->iUpdateConstantBuffer(constantBuffer, i);
+	_sim[0]->iUpdateConstantBuffer(constantBuffer, i);
 }
 
 void SimulationManager::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)
 {
-	_sim->iDraw(mCommandList, size, indexCount, i);
+	_sim[0]->iDraw(mCommandList, size, indexCount, i);
 }
 
 void SimulationManager::iSetDXApp(DX12App* dxApp)
@@ -80,22 +79,22 @@ void SimulationManager::iSetDXApp(DX12App* dxApp)
 
 UINT SimulationManager::iGetConstantBufferSize()
 {
-	return _sim->iGetConstantBufferSize();
+	return _sim[0]->iGetConstantBufferSize();
 }
 
 DirectX::XMINT3 SimulationManager::iGetObjectCount()
 {
-	return _sim->iGetObjectCount();
+	return _sim[0]->iGetObjectCount();
 }
 
 DirectX::XMFLOAT3 SimulationManager::iGetObjectSize()
 {
-	return _sim->iGetObjectSize();
+	return _sim[0]->iGetObjectSize();
 }
 
 DirectX::XMFLOAT3 SimulationManager::iGetObjectPositionOffset()
 {
-	return _sim->iGetObjectPositionOffset();
+	return _sim[0]->iGetObjectPositionOffset();
 }
 
 bool SimulationManager::iIsUpdated()
@@ -106,9 +105,6 @@ bool SimulationManager::iIsUpdated()
 
 void SimulationManager::iWMCreate(HWND hwnd, HINSTANCE hInstance)
 {
-	CreateWindow(L"button", _projFlag ? L"Proj : ON " : L"Proj : OFF ", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		90, 30, 100, 25, hwnd, reinterpret_cast<HMENU>(COM::PROJ_BTN), hInstance, NULL);
-
 	CreateWindow(L"button", _updateFlag ? L"бл" : L"в║", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
 		65, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::PLAY), hInstance, NULL);
 	CreateWindow(L"button", L"бс", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
@@ -137,37 +133,29 @@ void SimulationManager::iWMCommand(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lP
 {
 	switch (LOWORD(wParam))
 	{
-	case static_cast<int>(COM::PROJ_BTN):
-	{
-		_projFlag = !_projFlag;
-		SetDlgItemText(hwnd, static_cast<int>(COM::PROJ_BTN), _projFlag ? L"Proj : ON " : L"Proj : OFF");
-		_dxapp->resetSimulationState();
-	}
-	break;
+		// ### Execution buttons ###
+		case static_cast<int>(COM::PLAY):
+		{
+			_updateFlag = !_updateFlag;
+			SetDlgItemText(hwnd, static_cast<int>(COM::PLAY), _updateFlag ? L"бл" : L"в║");
 
-	// ### Execution buttons ###
-	case static_cast<int>(COM::PLAY):
-	{
-		_updateFlag = !_updateFlag;
-		SetDlgItemText(hwnd, static_cast<int>(COM::PLAY), _updateFlag ? L"бл" : L"в║");
-
-		EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::STOP)), true);
-		EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::NEXTSTEP)), !_updateFlag);
-	}
-	break;
-	case static_cast<int>(COM::STOP):
-	{
-		_dxapp->resetSimulationState();
-	}
-	break;
-	case static_cast<int>(COM::NEXTSTEP):
-	{
-		iUpdate();
-		_dxapp->update();
-		_dxapp->draw();
-	}
-	break;
-	// #####################
+			EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::STOP)), true);
+			EnableWindow(GetDlgItem(hwnd, static_cast<int>(COM::NEXTSTEP)), !_updateFlag);
+		}
+		break;
+		case static_cast<int>(COM::STOP):
+		{
+			_dxapp->resetSimulationState();
+		}
+		break;
+		case static_cast<int>(COM::NEXTSTEP):
+		{
+			iUpdate();
+			_dxapp->update();
+			_dxapp->draw();
+		}
+		break;
+		
 	}
 }
 
