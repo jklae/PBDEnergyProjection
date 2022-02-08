@@ -50,6 +50,8 @@ private:
 	float _updateFlag = true;
 	clock_t _simTime = 0;
 	int _simFrame = 0;
+	int _lineCount;
+	float _floorPosition;
 
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;

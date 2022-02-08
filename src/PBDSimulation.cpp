@@ -5,15 +5,14 @@ using namespace std;
 using namespace DXViewer::xmfloat2;
 using namespace DXViewer::xmint2;
 
-PBDSimulation::PBDSimulation(int x, int y, float timeStep, bool projFlag, DirectX::XMFLOAT2 posOffset)
-	:_timeStep(timeStep), _projFlag(projFlag), _posOffset(posOffset)
+PBDSimulation::PBDSimulation(int x, int y, float timeStep, 
+	bool projFlag, DirectX::XMFLOAT2 posOffset, float floorPosition)
+	:_timeStep(timeStep), _projFlag(projFlag), _posOffset(posOffset), _floorPosition(floorPosition)
 {
 	// Int, Float initialization
 	_nodeCount = { x, y };
-	_floorPosition = -2.0f * _nodeCount.y;
 	_stride = 2.0f;
 	_gravity = 9.8f;
-	_lineCount = max_element(_nodeCount) * 5;
 	_alpha = 0.001f; // Inverse k
 
 	// Vector initialization
@@ -53,27 +52,6 @@ void PBDSimulation::_initializeNode(std::vector<ConstantBuffer>& constantBuffer)
 
 			constantBuffer.push_back(objectCB);
 		}
-	}
-
-
-	// Floor, Line initialization
-	for (int i = 0; i < _lineCount * 2; i++)
-	{
-		float x = static_cast<float>(-_lineCount + i);
-		ConstantBuffer floorCB, lineCB;
-
-		floorCB.world = DXViewer::util::transformMatrix(
-			x, _floorPosition - 1.0f, 0.0f, 1.0f);
-		floorCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
-		floorCB.color = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
-
-		lineCB.world = DXViewer::util::transformMatrix(
-			x, _posOffset.y, 0.0f, 1.0f);
-		lineCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
-		lineCB.color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
-
-		constantBuffer.push_back(floorCB);
-		constantBuffer.push_back(lineCB);
 	}
 }
 
@@ -277,10 +255,7 @@ void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantB
 
 UINT PBDSimulation::iGetConstantBufferSize()
 {
-	return 
-		_nodeCount.x * _nodeCount.y		// Body
-		+ (_lineCount * 2)				// Floor
-		+ (_lineCount * 2);				// Line
+	return _nodeCount.x * _nodeCount.y;
 }
 
 DirectX::XMINT3 PBDSimulation::iGetObjectCount()

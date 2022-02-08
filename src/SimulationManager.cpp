@@ -5,9 +5,13 @@ using namespace std;
 SimulationManager::SimulationManager(int x, int y, float timeStep)
 {
 	float maxCount = static_cast<float>(max(x, y));
+	_lineCount = max(x, y) * 5;
+	_floorPosition = -2.0f * y;
 
-	_sim.push_back(new PBDSimulation(x, y, timeStep, false, XMFLOAT2(-maxCount, maxCount)));
-	_sim.push_back(new PBDSimulation(x, y, timeStep, false, XMFLOAT2(maxCount, maxCount)));
+	_sim.push_back(new PBDSimulation(x, y, timeStep, 
+		false, XMFLOAT2(-maxCount, maxCount), _floorPosition));
+	_sim.push_back(new PBDSimulation(x, y, timeStep, 
+		false, XMFLOAT2(+maxCount, maxCount), _floorPosition));
 }
 
 SimulationManager::~SimulationManager()
@@ -22,6 +26,7 @@ void SimulationManager::iUpdate()
 {
 	clock_t startTime = clock();
 	_sim[0]->iUpdate();
+	_sim[1]->iUpdate();
 	clock_t endTime = clock();
 
 	_simTime += endTime - startTime; // ms
@@ -79,11 +84,33 @@ void SimulationManager::iCreateObject(std::vector<ConstantBuffer>& constantBuffe
 {
 	_sim[0]->iCreateObject(constantBuffer);
 	_sim[1]->iCreateObject(constantBuffer);
+
+
+	// Floor, Line initialization
+	for (int i = 0; i < _lineCount * 2; i++)
+	{
+		float x = static_cast<float>(-_lineCount + i);
+		ConstantBuffer floorCB, lineCB;
+
+		floorCB.world = DXViewer::util::transformMatrix(
+			x, _floorPosition - 1.0f, 0.0f, 1.0f);
+		floorCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+		floorCB.color = XMFLOAT4(0.8f, 0.8f, 0.8f, 1.0f);
+
+		lineCB.world = DXViewer::util::transformMatrix(
+			x, -_floorPosition, 0.0f, 1.0f);
+		lineCB.worldViewProj = DXViewer::util::transformMatrix(0.0f, 0.0f, 0.0f);
+		lineCB.color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+		constantBuffer.push_back(floorCB);
+		constantBuffer.push_back(lineCB);
+	}
 }
 
 void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
 {
 	_sim[0]->iUpdateConstantBuffer(constantBuffer, i);
+	_sim[1]->iUpdateConstantBuffer(constantBuffer, i);
 }
 
 void SimulationManager::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)
@@ -99,7 +126,10 @@ void SimulationManager::iSetDXApp(DX12App* dxApp)
 
 UINT SimulationManager::iGetConstantBufferSize()
 {
-	return _sim[0]->iGetConstantBufferSize() + _sim[1]->iGetConstantBufferSize();
+	return 
+		_sim[0]->iGetConstantBufferSize() + _sim[1]->iGetConstantBufferSize()   // Node
+		+ (_lineCount * 2)														// Floor
+		+ (_lineCount * 2);														// Line
 }
 
 DirectX::XMINT3 SimulationManager::iGetObjectCount()

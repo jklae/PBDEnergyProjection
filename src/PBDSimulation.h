@@ -6,7 +6,8 @@
 class PBDSimulation
 {
 public:
-	PBDSimulation(int x, int y, float timeStep, bool projFlag, DirectX::XMFLOAT2 posOffset);
+	PBDSimulation(int x, int y, float timeStep, 
+		bool projFlag, DirectX::XMFLOAT2 posOffset, float floorPosition);
 	~PBDSimulation();
 
 #pragma region Implementation
@@ -39,7 +40,6 @@ private:
 	float _stride;
 	float _gravity;
 	float _hamiltonian = 0.0f;
-	int _lineCount;
 	float _alpha;
 	bool _projFlag;
 	DirectX::XMFLOAT2 _posOffset;
