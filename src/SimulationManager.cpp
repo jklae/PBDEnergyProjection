@@ -4,7 +4,9 @@ using namespace std;
 
 SimulationManager::SimulationManager(int x, int y, float timeStep)
 {
-	_sim.push_back(new PBDSimulation(x, y, timeStep, false));
+	float maxCount = static_cast<float>(max(x, y));
+	XMFLOAT2 posOffset = { -maxCount, maxCount };
+	_sim.push_back(new PBDSimulation(x, y, timeStep, false, posOffset));
 }
 
 SimulationManager::~SimulationManager()

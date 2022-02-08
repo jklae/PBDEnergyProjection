@@ -5,8 +5,8 @@ using namespace std;
 using namespace DXViewer::xmfloat2;
 using namespace DXViewer::xmint2;
 
-PBDSimulation::PBDSimulation(int x, int y, float timeStep, bool projFlag)
-	:_timeStep(timeStep), _projFlag(projFlag)
+PBDSimulation::PBDSimulation(int x, int y, float timeStep, bool projFlag, DirectX::XMFLOAT2 posOffset)
+	:_timeStep(timeStep), _projFlag(projFlag), _posOffset(posOffset)
 {
 	// Int, Float initialization
 	_nodeCount = { x, y };
@@ -14,7 +14,6 @@ PBDSimulation::PBDSimulation(int x, int y, float timeStep, bool projFlag)
 	_stride = 2.0f;
 	_gravity = 9.8f;
 	_lineCount = max_element(_nodeCount) * 5;
-	_posOffset = { 0.0f, static_cast<float>(max_element(_nodeCount)) };
 	_alpha = 0.001f; // Inverse k
 
 	// Vector initialization

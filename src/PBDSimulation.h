@@ -6,7 +6,7 @@
 class PBDSimulation
 {
 public:
-	PBDSimulation(int x, int y, float timeStep, bool projFlag);
+	PBDSimulation(int x, int y, float timeStep, bool projFlag, DirectX::XMFLOAT2 posOffset);
 	~PBDSimulation();
 
 #pragma region Implementation
