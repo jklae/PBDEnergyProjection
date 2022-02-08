@@ -11,8 +11,8 @@ using namespace DXViewer::xmint3;
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE prevInstance, PSTR cmdLine, int showCmd)
 {
-    int x = 10;
-    int y = 20;
+    int x = 4;
+    int y = 7;
     float dt = 0.01f;
     SimulationManager* sim = new SimulationManager(x, y, dt);
 

@@ -5,9 +5,9 @@ using namespace std;
 SimulationManager::SimulationManager(int x, int y, float timeStep)
 {
 	float maxCount = static_cast<float>(max(x, y));
-	XMFLOAT2 posOffset = { -maxCount, maxCount };
 
-	_sim.push_back(new PBDSimulation(x, y, timeStep, false, posOffset));
+	_sim.push_back(new PBDSimulation(x, y, timeStep, false, XMFLOAT2(-maxCount, maxCount)));
+	_sim.push_back(new PBDSimulation(x, y, timeStep, false, XMFLOAT2(maxCount, maxCount)));
 }
 
 SimulationManager::~SimulationManager()
@@ -78,6 +78,7 @@ UINT SimulationManager::iGetIndexBufferSize()
 void SimulationManager::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 {
 	_sim[0]->iCreateObject(constantBuffer);
+	_sim[1]->iCreateObject(constantBuffer);
 }
 
 void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
@@ -98,7 +99,7 @@ void SimulationManager::iSetDXApp(DX12App* dxApp)
 
 UINT SimulationManager::iGetConstantBufferSize()
 {
-	return _sim[0]->iGetConstantBufferSize();
+	return _sim[0]->iGetConstantBufferSize() + _sim[1]->iGetConstantBufferSize();
 }
 
 DirectX::XMINT3 SimulationManager::iGetObjectCount()
