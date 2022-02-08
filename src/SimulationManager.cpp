@@ -11,7 +11,7 @@ SimulationManager::SimulationManager(int x, int y, float timeStep)
 	_sim.push_back(new PBDSimulation(x, y, timeStep, 
 		false, XMFLOAT2(-maxCount, maxCount), _floorPosition));
 	_sim.push_back(new PBDSimulation(x, y, timeStep, 
-		false, XMFLOAT2(+maxCount, maxCount), _floorPosition));
+		true, XMFLOAT2(+maxCount, maxCount), _floorPosition));
 }
 
 SimulationManager::~SimulationManager()
@@ -109,8 +109,8 @@ void SimulationManager::iCreateObject(std::vector<ConstantBuffer>& constantBuffe
 
 void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
 {
-	_sim[0]->iUpdateConstantBuffer(constantBuffer, i);
-	_sim[1]->iUpdateConstantBuffer(constantBuffer, i);
+	_sim[0]->iUpdateConstantBuffer(constantBuffer, i, 0);
+	_sim[1]->iUpdateConstantBuffer(constantBuffer, i, 1);
 }
 
 void SimulationManager::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)

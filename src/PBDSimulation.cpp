@@ -242,14 +242,17 @@ void PBDSimulation::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 
 }
 
-void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
+void PBDSimulation::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i, int simIndex)
 {
 	int nodeCount = _nodeCount.x * _nodeCount.y;
 
-	if (i < nodeCount)
+	// if      simIndex == 0 then      0    <= i < nodeCount
+	// else if simIndex == 1 then nodeCount <= i < nodeCount * 2
+	if (i >= simIndex * nodeCount && i < (simIndex + 1) * nodeCount)
 	{
-		constantBuffer[i].world._41 = _nodePosition[i].x;
-		constantBuffer[i].world._42 = _nodePosition[i].y;
+		int idx = i % nodeCount; // Prevent the out of index
+		constantBuffer[i].world._41 = _nodePosition[idx].x;
+		constantBuffer[i].world._42 = _nodePosition[idx].y;
 	}
 }
 

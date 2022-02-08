@@ -18,7 +18,7 @@ public:
 
 	// DirectX methods
 	void iCreateObject(std::vector<ConstantBuffer>& constantBuffer);
-	void iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i);
+	void iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i, int simIndex);
 	UINT iGetConstantBufferSize();
 	DirectX::XMINT3 iGetObjectCount();
 	DirectX::XMFLOAT3 iGetObjectSize();
