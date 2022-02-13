@@ -2,7 +2,7 @@
 ## Overview
 ![demo](docs/images/demo.gif)
 
-PBDEnergyProjection is a simulation of deformable objects with the numerical energy-projection. Here, we implement eXtended Position Based Dynamics (XPBD)<sup>[1](#footnote_1)</sup>, the Small Steps technique <sup>[2](#footnote_2)</sup> and the Hamiltonian projection of Fast Energy-PRojection (FEPR)<sup>[3](#footnote_3)</sup>. This simulation is rendered using <A href="https://github.com/frostsim/DXViewer">DXViewer</A>.
+PBDEnergyProjection is a simulation of deformable objects with the numerical energy-projection. Here, we implement eXtended Position Based Dynamics (XPBD)<sup>[1](#footnote_1)</sup>, the Small Steps technique<sup>[2](#footnote_2)</sup> and the Hamiltonian projection of Fast Energy-PRojection (FEPR)<sup>[3](#footnote_3)</sup>. This simulation is rendered using <A href="https://github.com/frostsim/DXViewer">DXViewer</A>.
 
 ## Build
 This repo was developed in the following environment:
