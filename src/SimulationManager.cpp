@@ -166,21 +166,21 @@ bool SimulationManager::iIsUpdated()
 
 void SimulationManager::iWMCreate(HWND hwnd, HINSTANCE hInstance)
 {
-	CreateWindow(L"button", _updateFlag ? L"¡«" : L"¢º", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		65, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::PLAY), hInstance, NULL);
-	CreateWindow(L"button", L"¡á", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		115, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::STOP), hInstance, NULL);
-	CreateWindow(L"button", L"¢ºl", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
-		165, 305, 50, 25, hwnd, reinterpret_cast<HMENU>(COM::NEXTSTEP), hInstance, NULL);
+	CreateWindow(L"button", _updateFlag ? L"¡« Pause" : L"¢º Play", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		85, 140, 110, 30, hwnd, reinterpret_cast<HMENU>(COM::PLAY), hInstance, NULL);
+	CreateWindow(L"button", L"¡á  Stop", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		85, 180, 110, 30, hwnd, reinterpret_cast<HMENU>(COM::STOP), hInstance, NULL);
+	CreateWindow(L"button", L"¢ºl  Next", WS_CHILD | WS_VISIBLE | BS_PUSHBUTTON,
+		85, 220, 110, 30, hwnd, reinterpret_cast<HMENU>(COM::NEXTSTEP), hInstance, NULL);
 
 	CreateWindow(L"static", L"time :", WS_CHILD | WS_VISIBLE,
-		95, 350, 40, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
+		99, 270, 40, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
 	CreateWindow(L"static", to_wstring(_simTime).c_str(), WS_CHILD | WS_VISIBLE,
-		140, 350, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::TIME_TEXT), hInstance, NULL);
+		144, 270, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::TIME_TEXT), hInstance, NULL);
 	CreateWindow(L"static", L"frame :", WS_CHILD | WS_VISIBLE,
-		86, 370, 45, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
+		90, 290, 45, 20, hwnd, reinterpret_cast<HMENU>(-1), hInstance, NULL);
 	CreateWindow(L"static", to_wstring(_simFrame).c_str(), WS_CHILD | WS_VISIBLE,
-		140, 370, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::FRAME_TEXT), hInstance, NULL);
+		144, 290, 40, 20, hwnd, reinterpret_cast<HMENU>(COM::FRAME_TEXT), hInstance, NULL);
 
 	if (_updateFlag)
 	{
