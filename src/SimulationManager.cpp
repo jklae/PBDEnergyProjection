@@ -73,7 +73,7 @@ void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& const
 
 
 // Mesh methods
-vector<Vertex>& SimulationManager::iGetVertice()
+vector<Vertex>& SimulationManager::iGetVertices()
 {
 	_vertices =
 	{
@@ -86,7 +86,7 @@ vector<Vertex>& SimulationManager::iGetVertice()
 	return _vertices;
 }
 
-vector<unsigned int>& SimulationManager::iGetIndice()
+vector<unsigned int>& SimulationManager::iGetIndices()
 {
 	_indices =
 	{
