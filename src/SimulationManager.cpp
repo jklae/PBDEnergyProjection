@@ -8,9 +8,9 @@ SimulationManager::SimulationManager(int x, int y, float timeStep)
 	_lineCount = max(x, y) * 5;
 	_floorPosition = -2.0f * y;
 
-	_sim.push_back(new PBDSimulation(x, y, timeStep, 
+	_sim.push_back(PBDSimulation(x, y, timeStep, 
 		false, XMFLOAT2(-maxCount * 1.5f, maxCount), _floorPosition));
-	_sim.push_back(new PBDSimulation(x, y, timeStep, 
+	_sim.push_back(PBDSimulation(x, y, timeStep, 
 		true, XMFLOAT2(+maxCount * 1.5f, maxCount), _floorPosition));
 }
 
@@ -49,8 +49,8 @@ void SimulationManager::iUpdate()
 	clock_t startTime = clock();
 	for (int i = 0; i < 1; i++)
 	{
-		_sim[0]->iUpdate();
-		_sim[1]->iUpdate();
+		_sim[0].iUpdate();
+		_sim[1].iUpdate();
 	}
 	clock_t endTime = clock();
 
@@ -62,8 +62,8 @@ void SimulationManager::iResetSimulationState(std::vector<ConstantBuffer>& const
 {
 	constantBuffer.clear();
 
-	_sim[0]->iResetSimulationState(constantBuffer);
-	_sim[1]->iResetSimulationState(constantBuffer);
+	_sim[0].iResetSimulationState(constantBuffer);
+	_sim[1].iResetSimulationState(constantBuffer);
 
 	_createLine(constantBuffer);
 
@@ -112,16 +112,16 @@ UINT SimulationManager::iGetIndexBufferSize()
 // DirectX methods
 void SimulationManager::iCreateObject(std::vector<ConstantBuffer>& constantBuffer)
 {
-	_sim[0]->iCreateObject(constantBuffer);
-	_sim[1]->iCreateObject(constantBuffer);
+	_sim[0].iCreateObject(constantBuffer);
+	_sim[1].iCreateObject(constantBuffer);
 
 	_createLine(constantBuffer);
 }
 
 void SimulationManager::iUpdateConstantBuffer(std::vector<ConstantBuffer>& constantBuffer, int i)
 {
-	_sim[0]->iUpdateConstantBuffer(constantBuffer, i, 0);
-	_sim[1]->iUpdateConstantBuffer(constantBuffer, i, 1);
+	_sim[0].iUpdateConstantBuffer(constantBuffer, i, 0);
+	_sim[1].iUpdateConstantBuffer(constantBuffer, i, 1);
 }
 
 void SimulationManager::iDraw(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList>& mCommandList, int size, UINT indexCount, int i)
@@ -138,24 +138,24 @@ void SimulationManager::iSetDXApp(DX12App* dxApp)
 UINT SimulationManager::iGetConstantBufferSize()
 {
 	return 
-		_sim[0]->iGetConstantBufferSize() + _sim[1]->iGetConstantBufferSize()   // Node
+		_sim[0].iGetConstantBufferSize() + _sim[1].iGetConstantBufferSize()   // Node
 		+ (_lineCount * 2)														// Floor
 		+ (_lineCount * 2);														// Line
 }
 
 DirectX::XMINT3 SimulationManager::iGetObjectCount()
 {
-	return _sim[0]->iGetObjectCount();
+	return _sim[0].iGetObjectCount();
 }
 
 DirectX::XMFLOAT3 SimulationManager::iGetObjectSize()
 {
-	return _sim[0]->iGetObjectSize();
+	return _sim[0].iGetObjectSize();
 }
 
 DirectX::XMFLOAT3 SimulationManager::iGetObjectPositionOffset()
 {
-	return _sim[0]->iGetObjectPositionOffset();
+	return _sim[0].iGetObjectPositionOffset();
 }
 
 bool SimulationManager::iIsUpdated()

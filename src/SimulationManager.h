@@ -55,7 +55,7 @@ private:
 
 	std::vector<Vertex> _vertices;
 	std::vector<unsigned int> _indices;
-	std::vector<PBDSimulation*> _sim;
+	std::vector<PBDSimulation> _sim;
 
 	void _createLine(std::vector<ConstantBuffer>& constantBuffer);
 };
